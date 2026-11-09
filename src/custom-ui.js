@@ -1086,50 +1086,131 @@
       flex: none;
     }
     .bs-team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
     }
     .bs-fighter-card {
       background: var(--sf2, #1c2128);
       border: 1px solid var(--bd2, #30363d);
       border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: border-color 0.15s ease;
-    }
-    .bs-fighter-card.solo-winner {
-      border-color: var(--gold, #f2c665);
-      box-shadow: 0 0 10px rgba(242, 198, 101, 0.2);
-    }
-    .bs-fc-top {
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 16px;
+      transition: all 0.15s ease;
     }
-    .bs-slot-pill {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 1px 7px;
-      border-radius: 4px;
+    .bs-fighter-card:hover {
       background: var(--bd, #21262d);
+      border-color: var(--mut, #8b949e);
+    }
+    .bs-fighter-card.solo-winner {
+      border-color: var(--gold, #f2c665);
+      box-shadow: 0 0 12px rgba(242, 198, 101, 0.22);
+      background: linear-gradient(90deg, rgba(242, 198, 101, 0.08) 0%, var(--sf2, #1c2128) 45%);
+    }
+    .bs-fc-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1.25;
+      min-width: 290px;
+    }
+    .bs-slot-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #0d1117;
+      flex: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    .bs-fc-avatar {
+      width: 52px;
+      height: 52px;
+      flex: none;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .bs-fc-avatar img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .bs-fc-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .bs-fc-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .bs-fc-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-fc-sub {
+      font-size: 11.5px;
       color: var(--mut, #8b949e);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
     .bs-fc-trainer {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       color: var(--tx2, #c9d1d9);
     }
-    .bs-fc-status {
-      font-size: 11px;
+    .bs-fc-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .bs-badge-clan {
+      font-size: 11.5px;
       font-weight: 600;
-      padding: 2px 7px;
+      padding: 1px 7px;
+      border-radius: 4px;
+      background: rgba(126, 231, 135, 0.12);
+      border: 1px solid rgba(126, 231, 135, 0.35);
+      color: #7ee787;
+    }
+    .bs-badge-held {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 4px;
+      background: rgba(210, 168, 255, 0.12);
+      border: 1px solid rgba(210, 168, 255, 0.35);
+      color: #d2a8ff;
+    }
+    .bs-fc-status {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 8px;
       border-radius: 999px;
     }
     .bs-fc-status.survived {
@@ -1147,96 +1228,92 @@
       color: var(--mut, #8b949e);
       border: 1px solid rgba(139, 148, 158, 0.3);
     }
-    .bs-fc-body {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .bs-fc-avatar {
-      width: 44px;
-      height: 44px;
-      flex: none;
-      border-radius: 6px;
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .bs-fc-avatar img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      image-rendering: pixelated;
-    }
-    .bs-fc-info {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .bs-fc-name-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--tx, #e6edf3);
-    }
-    .bs-fc-sub {
-      font-size: 11px;
-      color: var(--mut, #8b949e);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .bs-fc-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-    .bs-badge-clan {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 1px 6px;
-      border-radius: 4px;
-      background: rgba(126, 231, 135, 0.12);
-      border: 1px solid rgba(126, 231, 135, 0.35);
-      color: #7ee787;
-    }
-    .bs-badge-held {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 1px 6px;
-      border-radius: 4px;
-      background: rgba(210, 168, 255, 0.12);
-      border: 1px solid rgba(210, 168, 255, 0.35);
-      color: #d2a8ff;
-    }
     .bs-fc-metrics {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      padding: 8px;
-      background: rgba(0, 0, 0, 0.22);
-      border-radius: 6px;
-      font-size: 11px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 8px 14px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      flex: 1.5;
+      min-width: 380px;
     }
     .bs-fc-metric-item {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 2px;
     }
     .bs-fc-metric-lbl {
       color: var(--mut, #8b949e);
-      font-size: 11px;
+      font-size: 11.5px;
+      white-space: nowrap;
     }
     .bs-fc-metric-val {
       color: var(--tx, #e6edf3);
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .bs-fc-unit {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      font-weight: 400;
+    }
+    .bs-fc-dmg-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+      flex: 0 0 135px;
+      text-align: right;
+      padding-left: 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .bs-fc-dmg-top {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .bs-fc-dmg-pct {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+    .bs-fc-dmg-lbl {
       font-size: 11.5px;
+      font-weight: 600;
+      color: var(--mut, #8b949e);
+    }
+    .bs-fc-dmg-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .bs-fc-dmg-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    @media (max-width: 960px) {
+      .bs-fighter-card {
+        flex-wrap: wrap;
+      }
+      .bs-fc-metrics {
+        order: 3;
+        width: 100%;
+        min-width: 0;
+      }
+      .bs-fc-dmg-box {
+        border-left: none;
+      }
     }
     .bs-drops-head {
       display: flex;
@@ -3446,12 +3523,13 @@
       </div>
     `;
 
-    // Renderizar Grid de 6 Luchadores
+    // Renderizar Grid de 6 Luchadores (1 por fila)
     let teamHtml = `<div class="bs-team-grid">`;
 
     battleResult.members.forEach((m, idx) => {
       const pk = m.pokemon;
       const isSoloWinner = battleResult.soloKill && idx === 0;
+      const segColor = BOSS_SEG_COLORS[idx % BOSS_SEG_COLORS.length];
 
       let statusBadge = '';
       if (m.didNotEnter) {
@@ -3479,64 +3557,88 @@
       const pokeSprUrl = getPokeSpriteUrl(speciesId, pk.shiny);
       const typesList = [pk.type1, pk.type2].filter(Boolean).map(t => `<span class="pk-type-tag ${String(t).toLowerCase()}">${t}</span>`).join(' ');
 
+      const resHits = m.effectiveHp ? Math.round(m.effectiveHp / m.bossDmgPerHit) : 0;
+      const resTime = formatSecsToMin(resHits * boss.interval);
+
+      let pctColor = 'var(--gold, #f2c665)';
+      if (m.didNotEnter || m.pctOfBoss <= 0) {
+        pctColor = 'var(--mut, #8b949e)';
+      } else if (m.pctOfBoss >= 100) {
+        pctColor = 'var(--gold, #f2c665)';
+      } else if (m.pctOfBoss >= 50) {
+        pctColor = 'var(--blu, #58a6ff)';
+      } else {
+        pctColor = 'var(--tx, #e6edf3)';
+      }
+
       teamHtml += `
         <div class="bs-fighter-card${isSoloWinner ? ' solo-winner' : ''}">
-          <div class="bs-fc-top">
-            <div style="display:flex;align-items:center;gap:6px">
-              <span class="bs-slot-pill">Slot #${m.slot}</span>
-              <span class="bs-fc-trainer">
-                <span style="width:7px;height:7px;border-radius:50%;background:${trainerDot};flex:none"></span>
-                ${trainerName}
-              </span>
-            </div>
-            ${statusBadge}
-          </div>
-
-          <div class="bs-fc-body">
+          <!-- Columna izquierda: Slot, Avatar e Identidad del Pokémon -->
+          <div class="bs-fc-left">
+            <div class="bs-slot-badge" style="background:${segColor}">#${m.slot}</div>
             <div class="bs-fc-avatar">
               ${pokeSprUrl
                 ? `<img src="${pokeSprUrl}" onerror="if(this.src.includes('/shiny/')){this.src=this.src.replace('/shiny/','/');}else{this.style.opacity='0.4';}" alt="${pk.name}">`
-                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--mut,#8b949e)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg></div>`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--mut,#8b949e)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg></div>`
               }
             </div>
             <div class="bs-fc-info">
               <div class="bs-fc-name-row">
-                <span>${pk.name}</span>
-                ${pk.shiny ? '<span style="color:var(--gold,#f2c665);font-size:12px">✨</span>' : ''}
-                <span class="pk-badge-lv" style="font-size:11px;padding:1px 6px">Nv. ${pk.level}</span>
+                <span class="bs-fc-name">${pk.name}</span>
+                ${pk.shiny ? '<span style="color:var(--gold,#f2c665);font-size:13px" title="Shiny">✨</span>' : ''}
+                <span class="pk-badge-lv" style="font-size:11.5px;padding:2px 7px">Nv. ${pk.level}</span>
+                ${statusBadge}
               </div>
               <div class="bs-fc-sub">
-                <span>Q: x${pk.quality || 1}</span>
-                <span>IV: ${pk.ivTotal != null ? pk.ivTotal : '?'}</span>
-                <div>${typesList}</div>
+                <span class="bs-fc-trainer">
+                  <span style="width:7px;height:7px;border-radius:50%;background:${trainerDot};flex:none"></span>
+                  ${trainerName}
+                </span>
+                <span style="opacity:0.35">·</span>
+                <span>Q: <strong>x${pk.quality || 1}</strong></span>
+                <span style="opacity:0.35">·</span>
+                <span>IV: <strong>${pk.ivTotal != null ? pk.ivTotal : '?'}</strong></span>
+                <span style="opacity:0.35">·</span>
+                <div style="display:inline-flex;gap:4px">${typesList}</div>
               </div>
+              ${(clanBadgeHtml || heldBadgeHtml) ? `<div class="bs-fc-badges">${clanBadgeHtml} ${heldBadgeHtml}</div>` : ''}
             </div>
           </div>
 
-          ${(clanBadgeHtml || heldBadgeHtml) ? `<div class="bs-fc-badges">${clanBadgeHtml} ${heldBadgeHtml}</div>` : ''}
-
+          <!-- Columna central: Métricas clave de combate -->
           <div class="bs-fc-metrics">
             <div class="bs-fc-metric-item">
-              <span class="bs-fc-metric-lbl">💥 Daño infligido</span>
-              <span class="bs-fc-metric-val" style="color:var(--gold,#f2c665)">${m.pokeDmgDone.toLocaleString()} <span style="font-size:11px;color:var(--mut)">(${m.pctOfBoss}%)</span></span>
-            </div>
-            <div class="bs-fc-metric-item">
-              <span class="bs-fc-metric-lbl">⚔️ Ataque</span>
-              <span class="bs-fc-metric-val">${m.pokeDmgPerHit.toLocaleString()} <span style="font-size:11px;color:var(--mut)">/ 1.35s</span></span>
+              <span class="bs-fc-metric-lbl">⚔️ Daño / 1.35s</span>
+              <span class="bs-fc-metric-val">${m.pokeDmgPerHit.toLocaleString()} <span class="bs-fc-unit">atk</span></span>
             </div>
             <div class="bs-fc-metric-item">
               <span class="bs-fc-metric-lbl">🛡️ Daño recibido</span>
-              <span class="bs-fc-metric-val">${m.bossDmgPerHit} <span style="font-size:11px;color:var(--mut)">/ golpe</span></span>
+              <span class="bs-fc-metric-val">${m.bossDmgPerHit.toLocaleString()} <span class="bs-fc-unit">/ golpe</span></span>
             </div>
             <div class="bs-fc-metric-item">
               <span class="bs-fc-metric-lbl">⏱️ Resistencia</span>
-              <span class="bs-fc-metric-val">${m.effectiveHp ? Math.round(m.effectiveHp / m.bossDmgPerHit) : 0} golpes <span style="font-size:11px;color:var(--mut)">(~${formatSecsToMin((m.effectiveHp ? Math.round(m.effectiveHp / m.bossDmgPerHit) : 0) * boss.interval)})</span></span>
+              <span class="bs-fc-metric-val">${resHits} <span class="bs-fc-unit">golpes</span> <span style="font-size:11px;color:var(--mut);font-weight:400">(~${resTime})</span></span>
+            </div>
+            <div class="bs-fc-metric-item">
+              <span class="bs-fc-metric-lbl">💥 Daño aportado</span>
+              <span class="bs-fc-metric-val" style="color:var(--gold,#f2c665)">${m.pokeDmgDone.toLocaleString()} <span class="bs-fc-unit">HP</span></span>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Porcentaje de daño en grande -->
+          <div class="bs-fc-dmg-box">
+            <div class="bs-fc-dmg-top">
+              ${isSoloWinner ? '<span style="font-size:16px" title="Solo-Kill">👑</span>' : ''}
+              <span class="bs-fc-dmg-pct" style="color:${pctColor}">${m.pctOfBoss}%</span>
+            </div>
+            <span class="bs-fc-dmg-lbl">${m.pokeDmgDone.toLocaleString()} HP</span>
+            <div class="bs-fc-dmg-track" title="${m.pctOfBoss}% de ${boss.name}">
+              <div class="bs-fc-dmg-fill" style="width:${Math.min(100, Math.max(0, m.pctOfBoss))}%;background:${segColor}"></div>
             </div>
           </div>
         </div>
       `;
     });
-
     teamHtml += `</div>`;
 
     bodyContent.innerHTML = scopeHtml + clanBarHtml + outcomeHtml + hpBarHtml + teamHtml;
