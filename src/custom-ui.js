@@ -1,5 +1,33 @@
 // src/custom-ui.js - Extensión de UI en vivo para PokeGrid (recarga sin reiniciar juegos)
 (function() {
+  // Estilos personalizados
+  window.setCustomStyle = function(css) {
+    let el = document.getElementById('pgCustomStyle');
+    if (!el) {
+      el = document.createElement('style');
+      el.id = 'pgCustomStyle';
+      document.head.appendChild(el);
+    }
+    el.textContent = css || '';
+  };
+
+  window.setCustomStyle(`
+    .cd-fav-inv {
+      cursor: pointer;
+      flex: none;
+      font-size: 13px;
+      line-height: 1;
+      margin-left: 6px;
+      user-select: none;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+    .cd-fav-inv:hover {
+      transform: scale(1.25);
+      color: var(--gold) !important;
+    }
+  `);
+
+  // Card Consumibles (Pokéballs, Potions, Divisas)
   window.CUSTOM_SB_CONSUMABLES = function(ctx) {
     const { cols, t, esc, ico, fmtQty, fmtVip, getQty, nf } = ctx;
     const coinSvg = '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" style="flex:none"><circle cx="8" cy="8" r="6.5" fill="#f2c665" stroke="#a9781f" stroke-width="1"/><circle cx="8" cy="8" r="4.2" fill="none" stroke="#c9922f" stroke-width="1"/><path d="M5 4.3a4.5 4.5 0 0 1 3.5-1" stroke="#fff2c8" stroke-width="1" fill="none" stroke-linecap="round" opacity=".85"/></svg>';
@@ -56,13 +84,110 @@
     return '<div class="cd-sec"><div class="cd-h" style="display:flex;align-items:center;gap:8px"><span>' + (t('cdConsumables') || 'Consumibles') + '</span></div>' + inner + '</div>';
   };
 
-  window.setCustomStyle = function(css) {
-    let el = document.getElementById('pgCustomStyle');
-    if (!el) {
-      el = document.createElement('style');
-      el.id = 'pgCustomStyle';
-      document.head.appendChild(el);
+  // Card Inventario Global en caliente (permite marcar favoritos y fijarlos arriba)
+  let isEnhancing = false;
+  window.enhanceInvCard = function() {
+    if (isEnhancing) return;
+    const invIt = document.querySelector('.cd-it[data-s="inv"]');
+    if (!invIt) return;
+
+    let invFavs = {};
+    try { invFavs = JSON.parse(localStorage.getItem('invFavs') || '{}'); } catch {}
+
+    const inp = invIt.querySelector('#cdInvF');
+    const filterText = (inp ? inp.value : '').trim().toLowerCase();
+
+    const rows = Array.from(invIt.querySelectorAll('.cd-row'));
+    if (!rows.length) return;
+
+    isEnhancing = true;
+    try {
+      rows.forEach(row => {
+        const hideEl = row.querySelector('.cd-hide[data-inv]');
+        let star = row.querySelector('.cd-fav-inv');
+        const id = (star && star.dataset.inv) || (hideEl && hideEl.dataset.inv) || '';
+        const rnEl = row.querySelector('.rn');
+        const nameText = rnEl ? rnEl.textContent.trim() : '';
+
+        const isFav = !!(invFavs[id] || (nameText && invFavs[nameText.toLowerCase()]));
+        row.__isFav = isFav;
+        row.__name = nameText.toLowerCase();
+
+        if (!star) {
+          star = document.createElement('span');
+          star.className = 'cd-fav-inv';
+          star.dataset.inv = id;
+          star.dataset.n = nameText;
+          if (hideEl) row.insertBefore(star, hideEl);
+          else row.appendChild(star);
+        }
+
+        star.dataset.inv = id;
+        star.dataset.n = nameText;
+        star.textContent = isFav ? '★' : '☆';
+        star.style.color = isFav ? 'var(--gold)' : '#444c56';
+        star.title = isFav ? 'Quitar de favoritos' : 'Fijar como favorito';
+
+        star.onclick = (e) => {
+          e.stopPropagation();
+          if (invFavs[id] || (nameText && invFavs[nameText.toLowerCase()])) {
+            delete invFavs[id];
+            if (nameText) delete invFavs[nameText.toLowerCase()];
+          } else {
+            invFavs[id] = nameText || 1;
+          }
+          try { localStorage.setItem('invFavs', JSON.stringify(invFavs)); } catch {}
+          if (typeof cdHtmlAnt !== 'undefined') { window.cdHtmlAnt = ''; }
+          if (typeof refreshCards === 'function') { refreshCards(true); }
+          else { window.enhanceInvCard(); }
+        };
+
+        // Filtro de búsqueda:
+        // Los favoritos se muestran SIEMPRE independientemente de la búsqueda que se haga
+        if (isFav) {
+          row.style.display = '';
+        } else if (filterText) {
+          row.style.display = row.__name.includes(filterText) ? '' : 'none';
+        } else {
+          row.style.display = '';
+        }
+      });
+
+      // Reordenar en el DOM: favoritos arriba de todo
+      const container = rows[0].parentNode;
+      const favRows = rows.filter(r => r.__isFav);
+      const nonFavRows = rows.filter(r => !r.__isFav);
+      const sorted = favRows.concat(nonFavRows);
+
+      sorted.forEach(r => container.appendChild(r));
+
+      // Mantener el enlace de ocultos al final si existe
+      const pe = invIt.querySelector('#cdShowHiddenInv');
+      if (pe && pe.parentNode && pe.parentNode.parentNode === container) {
+        container.appendChild(pe.parentNode);
+      }
+
+      // Conectar evento input para filtrado dinámico en vivo
+      if (inp && !inp.__hasFavFilterListener) {
+        inp.__hasFavFilterListener = true;
+        inp.addEventListener('input', () => {
+          window.enhanceInvCard();
+        });
+      }
+    } finally {
+      setTimeout(() => { isEnhancing = false; }, 30);
     }
-    el.textContent = css || '';
   };
+
+  // Ejecución inicial y observación de cambios en el contenedor de cards
+  setTimeout(() => {
+    window.enhanceInvCard();
+    const cards = document.getElementById('cards');
+    if (cards && !window.__cardsInvObserver) {
+      window.__cardsInvObserver = new MutationObserver(() => {
+        if (!isEnhancing) window.enhanceInvCard();
+      });
+      window.__cardsInvObserver.observe(cards, { childList: true, subtree: true });
+    }
+  }, 50);
 })();
