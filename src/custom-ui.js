@@ -906,6 +906,90 @@
       align-items: center;
       gap: 4px;
     }
+    .bs-clan-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+    }
+    .bs-clan-head {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bs-clan-lbl {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-clan-sub {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+    }
+    .bs-clan-chips {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .bs-clan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bd, #21262d);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 999px;
+      color: var(--mut, #8b949e);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .bs-clan-chip:hover {
+      border-color: var(--mut, #8b949e);
+      color: var(--tx, #e6edf3);
+    }
+    .bs-clan-chip.on {
+      background: rgba(88, 166, 255, 0.15);
+      border-color: var(--blu, #58a6ff);
+      color: var(--blu, #58a6ff);
+      font-weight: 700;
+    }
+    .bs-clan-chip .bs-clan-types {
+      font-size: 11px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+    .bs-clan-fixed {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .bs-clan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .bs-clan-badge.mut {
+      color: var(--mut, #8b949e);
+    }
+    .bs-clan-empty-tip {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      font-style: italic;
+    }
     .bs-outcome-banner {
       display: flex;
       align-items: center;
@@ -2572,6 +2656,19 @@
     malefic: ['GHOST', 'DARK', 'POISON']
   };
 
+  const CLAN_INFO = {
+    naturia:     { name: 'Naturia',     icon: '🌿', typesText: 'Planta / Bicho',               color: '#7ee787' },
+    volcanic:    { name: 'Volcanic',    icon: '🔥', typesText: 'Fuego',                        color: '#ff7b72' },
+    seavell:     { name: 'Seavell',     icon: '💧', typesText: 'Agua / Hielo',                 color: '#79c0ff' },
+    raibolt:     { name: 'Raibolt',     icon: '⚡', typesText: 'Eléctrico',                    color: '#f2cc60' },
+    orebound:    { name: 'Orebound',    icon: '⛰️', typesText: 'Roca',                         color: '#d29922' },
+    ironhard:    { name: 'Ironhard',    icon: '🛡️', typesText: 'Acero / Tierra',               color: '#b08800' },
+    psycraft:    { name: 'Psycraft',    icon: '🔮', typesText: 'Psíquico / Hada',              color: '#d2a8ff' },
+    gardestrike: { name: 'Gardestrike', icon: '🥊', typesText: 'Lucha / Normal',               color: '#e3b341' },
+    wingeon:     { name: 'Wingeon',     icon: '🦅', typesText: 'Volador / Dragón',             color: '#56d364' },
+    malefic:     { name: 'Malefic',     icon: '👻', typesText: 'Fantasma / Siniestro / Veneno', color: '#bc8cff' }
+  };
+
   const RARITY_THEME = {
     legendary: { color: '#f2c665', bg: 'rgba(242, 198, 101, 0.12)', border: 'rgba(242, 198, 101, 0.40)', label: 'Legendario' },
     mythic:    { color: '#bc8cff', bg: 'rgba(188, 140, 255, 0.12)', border: 'rgba(188, 140, 255, 0.40)', label: 'Mítico' },
@@ -2586,6 +2683,7 @@
   let selectedBossId = 'cruel';
   let selectedBossTab = 'battle'; // 'battle' | 'drops'
   let selectedBossScope = 'all';  // 'all' | '0' | '1' ...
+  let selectedGlobalClan = 'none'; // 'none' | 'naturia' | 'orebound' ...
 
   const getItemIconUrl = (iconPath) => {
     if (!iconPath) return '';
@@ -2623,12 +2721,13 @@
     const types = [pk.type1, pk.type2].filter(Boolean).map(t => String(t).toUpperCase());
     let clanMult = 1.0;
     let clanName = null;
-    if (clanSlug) {
+    if (clanSlug && clanSlug !== 'none') {
       const cKey = String(clanSlug).toLowerCase().trim();
       const cTypes = CLAN_TYPES_TABLE[cKey] || [];
       if (types.some(t => cTypes.includes(t))) {
         clanMult = 1.15;
-        clanName = clanSlug.charAt(0).toUpperCase() + clanSlug.slice(1);
+        const cInfo = CLAN_INFO[cKey];
+        clanName = cInfo ? cInfo.name : (clanSlug.charAt(0).toUpperCase() + clanSlug.slice(1));
       }
     }
 
@@ -2695,15 +2794,25 @@
     };
   }
 
-  function simulateTeamBattle(team, boss, defaultClan) {
+  function simulateTeamBattle(team, boss, activeClan) {
     let currentTime = 0;
     let remainingBossHp = boss.hp;
     const battleLog = [];
     let victory = false;
 
+    // Si se pasa activeClan explícitamente (incluso null o 'none'), se aplica ese único clan
+    // a todo el equipo (solo a los miembros cuyos tipos coincidan).
+    // Si activeClan es undefined (compatibilidad hacia atrás), usa pk.clan.
+    const getClanForMember = (pk) => {
+      if (activeClan !== undefined) {
+        return (activeClan && activeClan !== 'none') ? activeClan : null;
+      }
+      return pk.clan || null;
+    };
+
     for (let i = 0; i < team.length; i++) {
       const pk = team[i];
-      const clanToUse = pk.clan || defaultClan || null;
+      const clanToUse = getClanForMember(pk);
       const evalRes = evaluateCandidateVsBoss(pk, boss, clanToUse);
       const enteredAt = currentTime;
 
@@ -2768,7 +2877,7 @@
 
     for (let j = battleLog.length; j < team.length; j++) {
       const pk = team[j];
-      const clanToUse = pk.clan || defaultClan || null;
+      const clanToUse = getClanForMember(pk);
       const evalRes = evaluateCandidateVsBoss(pk, boss, clanToUse);
       battleLog.push({
         slot: j + 1,
@@ -3293,7 +3402,7 @@
 
     teamHtml += `</div>`;
 
-    bodyContent.innerHTML = scopeHtml + outcomeHtml + hpBarHtml + teamHtml;
+    bodyContent.innerHTML = scopeHtml + clanBarHtml + outcomeHtml + hpBarHtml + teamHtml;
     window.bindBossScopeEvents(ov);
   };
 

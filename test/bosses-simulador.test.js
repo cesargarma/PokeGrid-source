@@ -35,6 +35,7 @@ const sandbox = {};
 const fn = new Function('sandbox', moduleCode + '\n' + `
   sandbox.BOSSES_CONFIG = BOSSES_CONFIG;
   sandbox.CLAN_TYPES_TABLE = CLAN_TYPES_TABLE;
+  sandbox.CLAN_INFO = CLAN_INFO;
   sandbox.RARITY_THEME = RARITY_THEME;
   sandbox.getHeldItemBonus = getHeldItemBonus;
   sandbox.evaluateCandidateVsBoss = evaluateCandidateVsBoss;
@@ -43,7 +44,7 @@ const fn = new Function('sandbox', moduleCode + '\n' + `
 `);
 fn(sandbox);
 
-const { BOSSES_CONFIG, CLAN_TYPES_TABLE, getHeldItemBonus, evaluateCandidateVsBoss, simulateTeamBattle, getItemIconUrl } = sandbox;
+const { BOSSES_CONFIG, CLAN_TYPES_TABLE, CLAN_INFO, getHeldItemBonus, evaluateCandidateVsBoss, simulateTeamBattle, getItemIconUrl } = sandbox;
 
 // 2. Verificar configuración de los Bosses activos y sus assets
 assert.ok(BOSSES_CONFIG.cruel, 'Giant Cruel debe existir');
@@ -68,13 +69,17 @@ BOSSES_CONFIG.aerodactyl2.drops.forEach(d => {
 
 console.log('OK  BOSSES_CONFIG validado (Giant Cruel 79.2K HP, Ancient Aero 79.2K HP, avatares y drops con iconos)');
 
-// 3. Verificar tabla de Clanes
+// 3. Verificar tabla de Clanes y Metadatos de CLAN_INFO
 assert.ok(CLAN_TYPES_TABLE.naturia.includes('GRASS') && CLAN_TYPES_TABLE.naturia.includes('BUG'), 'Naturia debe incluir Grass y Bug');
 assert.ok(CLAN_TYPES_TABLE.seavell.includes('WATER') && CLAN_TYPES_TABLE.seavell.includes('ICE'), 'Seavell debe incluir Water e Ice');
 assert.ok(CLAN_TYPES_TABLE.orebound.includes('ROCK'), 'Orebound debe incluir Rock');
 assert.ok(CLAN_TYPES_TABLE.gardestrike.includes('NORMAL') && CLAN_TYPES_TABLE.gardestrike.includes('FIGHTING'), 'Gardestrike debe incluir Normal y Fighting');
 
-console.log('OK  CLAN_TYPES_TABLE validada con afinidades oficiales');
+assert.ok(CLAN_INFO.orebound && CLAN_INFO.orebound.icon === '⛰️', 'Orebound debe tener icono ⛰️');
+assert.ok(CLAN_INFO.naturia && CLAN_INFO.naturia.icon === '🌿', 'Naturia debe tener icono 🌿');
+assert.equal(Object.keys(CLAN_INFO).length, 10, 'CLAN_INFO debe contener los 10 clanes oficiales');
+
+console.log('OK  CLAN_TYPES_TABLE y CLAN_INFO validados con afinidades oficiales e iconos');
 
 // 4. Verificar multiplicadores de Held Items
 const vit = getHeldItemBonus('X-Vitality');
@@ -120,6 +125,27 @@ assert.ok(resAero.members[2].didNotEnter, 'El slot 3 no debió entrar (quedó en
 assert.ok(resAero.members[3].didNotEnter, 'El slot 4 no debió entrar (quedó en reserva)');
 
 console.log('OK  Simulación vs Ancient Aero: Victoria en equipo con reserva ilesa');
+
+// 6b. Probar selección de Clan en "Todas las cuentas" (Sin clan por defecto vs Clan específico seleccionado)
+// A) Sin Clan (por defecto en Todas las cuentas): ninguno recibe bonus
+const resSinClan = simulateTeamBattle(team, BOSSES_CONFIG.aerodactyl2, 'none');
+assert.equal(resSinClan.members[0].clanBonus, false, 'Sin clan activo, Tyranitar no debe recibir bonus');
+assert.equal(resSinClan.members[1].clanBonus, false, 'Sin clan activo, Exeggutor no debe recibir bonus');
+assert.equal(resSinClan.members[2].clanBonus, false, 'Sin clan activo, Dragonite no debe recibir bonus');
+
+// B) Orebound seleccionado: solo Tyranitar (Roca) recibe bonus
+const resOrebound = simulateTeamBattle(team, BOSSES_CONFIG.aerodactyl2, 'orebound');
+assert.equal(resOrebound.members[0].clanBonus, true, 'Con Orebound activo, Tyranitar (Roca) debe recibir bonus');
+assert.equal(resOrebound.members[0].clanName, 'Orebound', 'Nombre del clan debe ser Orebound');
+assert.equal(resOrebound.members[1].clanBonus, false, 'Con Orebound activo, Exeggutor no debe recibir bonus');
+
+// C) Naturia seleccionado: solo Exeggutor (Planta) recibe bonus
+const resNaturia = simulateTeamBattle(team, BOSSES_CONFIG.aerodactyl2, 'naturia');
+assert.equal(resNaturia.members[0].clanBonus, false, 'Con Naturia activo, Tyranitar no debe recibir bonus');
+assert.equal(resNaturia.members[1].clanBonus, true, 'Con Naturia activo, Exeggutor (Planta) debe recibir bonus');
+assert.equal(resNaturia.members[1].clanName, 'Naturia', 'Nombre del clan debe ser Naturia');
+
+console.log('OK  Selección dinámica de clan en Todas las cuentas verificada (Sin clan 0%, Orebound y Naturia filtrando por tipos)');
 
 // 7. Prueba de combate: Solo-Kill
 const soloGodSnorlax = [
