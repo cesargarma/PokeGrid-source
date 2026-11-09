@@ -337,6 +337,65 @@
       color: #f778ba;
       font-weight: 700;
     }
+    .pk-range-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      padding: 2px 7px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pk-range-group:focus-within {
+      border-color: #388bfd;
+      box-shadow: 0 0 0 2px rgba(56, 139, 253, 0.25);
+    }
+    .pk-range-label {
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+      font-weight: 600;
+      user-select: none;
+    }
+    .pk-range-sep {
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+      user-select: none;
+      opacity: 0.7;
+    }
+    .pk-range-input {
+      width: 44px;
+      background: transparent;
+      border: none;
+      color: var(--tx, #e6edf3);
+      font-size: 11px;
+      padding: 2px 1px;
+      outline: none;
+      text-align: center;
+    }
+    .pk-range-input::placeholder {
+      color: var(--mut, #8b949e);
+      opacity: 0.55;
+    }
+    .pk-clear-btn {
+      background: rgba(248, 81, 73, 0.12);
+      border: 1px solid rgba(248, 81, 73, 0.35);
+      border-radius: 6px;
+      color: #f85149;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .pk-clear-btn:hover {
+      background: rgba(248, 81, 73, 0.25);
+      border-color: #f85149;
+    }
     .pk-counts {
       margin-left: auto;
       font-size: 11.5px;
@@ -847,6 +906,10 @@
   let pokesRenderLimit = 100;
   let pokesSearchText = '';
   let pokesShinyOnly = false;
+  let pokesIvMin = null;
+  let pokesIvMax = null;
+  let pokesQualMin = null;
+  let pokesQualMax = null;
   let pokesIsLoading = false;
 
   const POKES_PRESETS = [
@@ -990,8 +1053,21 @@
             </svg>
             <input type="search" id="pkSearchInput" placeholder="Buscar por nombre o tipo..." autocomplete="off" spellcheck="false">
           </div>
+          <div class="pk-range-group" title="Filtrar por IV total (0 a 192)">
+            <span class="pk-range-label">IV:</span>
+            <input type="text" id="pkIvMin" class="pk-range-input" placeholder="desde" maxlength="3">
+            <span class="pk-range-sep">-</span>
+            <input type="text" id="pkIvMax" class="pk-range-input" placeholder="hasta" maxlength="3">
+          </div>
+          <div class="pk-range-group" title="Filtrar por Calidad (ej. 0.9 o 1.25)">
+            <span class="pk-range-label">Calidad:</span>
+            <input type="text" id="pkQualMin" class="pk-range-input" placeholder="desde" maxlength="5">
+            <span class="pk-range-sep">-</span>
+            <input type="text" id="pkQualMax" class="pk-range-input" placeholder="hasta" maxlength="5">
+          </div>
           <div class="pk-trainer-chips" id="pkTrainerChips"></div>
           <button id="pkShinyFilter" class="pk-shiny-btn" title="Filtrar solo shiny">✨ Shiny</button>
+          <button id="pkClearFilters" class="pk-clear-btn" title="Limpiar filtros de IV y Calidad">✕ Limpiar</button>
           <span class="pk-counts" id="pkFilteredCount">Mostrando 0</span>
         </div>
 
@@ -1049,6 +1125,44 @@
         pokesRenderLimit = 100;
         shinyBtn.classList.toggle('on', pokesShinyOnly);
         window.renderPokesTable();
+      };
+    }
+
+    const parseNumFilter = (val) => {
+      if (val == null) return null;
+      const str = String(val).trim().replace(',', '.');
+      if (str === '') return null;
+      const n = +str;
+      return Number.isFinite(n) ? n : null;
+    };
+
+    const ivMinInp = ov.querySelector('#pkIvMin');
+    const ivMaxInp = ov.querySelector('#pkIvMax');
+    const qualMinInp = ov.querySelector('#pkQualMin');
+    const qualMaxInp = ov.querySelector('#pkQualMax');
+    const clearFiltersBtn = ov.querySelector('#pkClearFilters');
+
+    const onRangeFilterChange = () => {
+      pokesIvMin = parseNumFilter(ivMinInp ? ivMinInp.value : null);
+      pokesIvMax = parseNumFilter(ivMaxInp ? ivMaxInp.value : null);
+      pokesQualMin = parseNumFilter(qualMinInp ? qualMinInp.value : null);
+      pokesQualMax = parseNumFilter(qualMaxInp ? qualMaxInp.value : null);
+      pokesRenderLimit = 100;
+      window.renderPokesTable();
+    };
+
+    if (ivMinInp) ivMinInp.oninput = onRangeFilterChange;
+    if (ivMaxInp) ivMaxInp.oninput = onRangeFilterChange;
+    if (qualMinInp) qualMinInp.oninput = onRangeFilterChange;
+    if (qualMaxInp) qualMaxInp.oninput = onRangeFilterChange;
+
+    if (clearFiltersBtn) {
+      clearFiltersBtn.onclick = () => {
+        if (ivMinInp) ivMinInp.value = '';
+        if (ivMaxInp) ivMaxInp.value = '';
+        if (qualMinInp) qualMinInp.value = '';
+        if (qualMaxInp) qualMaxInp.value = '';
+        onRangeFilterChange();
       };
     }
 
@@ -1288,6 +1402,18 @@
         if (!nm.includes(pokesSearchText) && !t1.includes(pokesSearchText) && !t2.includes(pokesSearchText)) {
           return false;
         }
+      }
+      if (pokesIvMin != null) {
+        if (pk.ivTotal == null || +pk.ivTotal < pokesIvMin) return false;
+      }
+      if (pokesIvMax != null) {
+        if (pk.ivTotal == null || +pk.ivTotal > pokesIvMax) return false;
+      }
+      if (pokesQualMin != null) {
+        if (pk.quality == null || +pk.quality < pokesQualMin) return false;
+      }
+      if (pokesQualMax != null) {
+        if (pk.quality == null || +pk.quality > pokesQualMax) return false;
       }
       return true;
     });
