@@ -8,6 +8,7 @@
       refreshCards(true);
     }
   } catch {}
+
   // Asegurar que cdInvF no mantenga un filtro estricto que destruya los elementos en SB.inv
   try {
     const lastF = localStorage.getItem('cdInvF');
@@ -238,13 +239,19 @@
     }
     .pk-toolbar {
       display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 10px 18px;
+      flex-direction: column;
+      gap: 7px;
+      padding: 9px 18px;
       background: var(--bg, #0d1117);
       border-bottom: 1px solid var(--bd2, #30363d);
       font-size: 12px;
+    }
+    .pk-toolbar-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 100%;
     }
     .pk-search-box {
       position: relative;
@@ -1047,28 +1054,40 @@
         <div class="pk-presets-bar" id="pkPresetsBar"></div>
 
         <div class="pk-toolbar">
-          <div class="pk-search-box">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 0-1.06 1.06l3.79 3.79a.75.75 0 1 0 1.06-1.06l-3.79-3.79z"/>
-            </svg>
-            <input type="search" id="pkSearchInput" placeholder="Buscar por nombre o tipo..." autocomplete="off" spellcheck="false">
+          <div class="pk-toolbar-row">
+            <div class="pk-search-box">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 0-1.06 1.06l3.79 3.79a.75.75 0 1 0 1.06-1.06l-3.79-3.79z"/>
+              </svg>
+              <input type="search" id="pkSearchInput" placeholder="Buscar por nombre o tipo..." autocomplete="off" spellcheck="false">
+            </div>
+
+            <div class="pk-range-group" title="Filtrar por rango de IV total (0 - 192)">
+              <span class="pk-range-label">IV:</span>
+              <input type="text" inputmode="decimal" id="pkIvMin" class="pk-range-input" placeholder="Desde" title="IV mínimo (desde)">
+              <span class="pk-range-sep">-</span>
+              <input type="text" inputmode="decimal" id="pkIvMax" class="pk-range-input" placeholder="Hasta" title="IV máximo (hasta)">
+            </div>
+
+            <div class="pk-range-group" title="Filtrar por rango de Calidad (ej. 0.9, 1.5, 2.0)">
+              <span class="pk-range-label">Calidad:</span>
+              <input type="text" inputmode="decimal" id="pkQualMin" class="pk-range-input" placeholder="Desde" title="Calidad mínima (desde)">
+              <span class="pk-range-sep">-</span>
+              <input type="text" inputmode="decimal" id="pkQualMax" class="pk-range-input" placeholder="Hasta" title="Calidad máxima (hasta)">
+            </div>
+
+            <button id="pkShinyFilter" class="pk-shiny-btn" title="Filtrar solo shiny">✨ Shiny</button>
+            <button id="pkClearFiltersBtn" class="pk-clear-btn" title="Limpiar filtros de IV y Calidad" style="display:none">✕ Limpiar</button>
           </div>
-          <div class="pk-range-group" title="Filtrar por IV total (0 a 192)">
-            <span class="pk-range-label">IV:</span>
-            <input type="text" id="pkIvMin" class="pk-range-input" placeholder="desde" maxlength="3">
-            <span class="pk-range-sep">-</span>
-            <input type="text" id="pkIvMax" class="pk-range-input" placeholder="hasta" maxlength="3">
+
+          <div class="pk-toolbar-row">
+            <span style="color:var(--mut,#8b949e);font-size:11px;font-weight:600;user-select:none;display:inline-flex;align-items:center;gap:4px">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+              Entrenador:
+            </span>
+            <div class="pk-trainer-chips" id="pkTrainerChips"></div>
+            <span class="pk-counts" id="pkFilteredCount">Mostrando 0</span>
           </div>
-          <div class="pk-range-group" title="Filtrar por Calidad (ej. 0.9 o 1.25)">
-            <span class="pk-range-label">Calidad:</span>
-            <input type="text" id="pkQualMin" class="pk-range-input" placeholder="desde" maxlength="5">
-            <span class="pk-range-sep">-</span>
-            <input type="text" id="pkQualMax" class="pk-range-input" placeholder="hasta" maxlength="5">
-          </div>
-          <div class="pk-trainer-chips" id="pkTrainerChips"></div>
-          <button id="pkShinyFilter" class="pk-shiny-btn" title="Filtrar solo shiny">✨ Shiny</button>
-          <button id="pkClearFilters" class="pk-clear-btn" title="Limpiar filtros de IV y Calidad">✕ Limpiar</button>
-          <span class="pk-counts" id="pkFilteredCount">Mostrando 0</span>
         </div>
 
         <div class="pk-table-container">
@@ -1140,14 +1159,18 @@
     const ivMaxInp = ov.querySelector('#pkIvMax');
     const qualMinInp = ov.querySelector('#pkQualMin');
     const qualMaxInp = ov.querySelector('#pkQualMax');
-    const clearFiltersBtn = ov.querySelector('#pkClearFilters');
+    const clearFiltersBtn = ov.querySelector('#pkClearFiltersBtn');
 
     const onRangeFilterChange = () => {
-      pokesIvMin = parseNumFilter(ivMinInp ? ivMinInp.value : null);
-      pokesIvMax = parseNumFilter(ivMaxInp ? ivMaxInp.value : null);
-      pokesQualMin = parseNumFilter(qualMinInp ? qualMinInp.value : null);
-      pokesQualMax = parseNumFilter(qualMaxInp ? qualMaxInp.value : null);
+      pokesIvMin = parseNumFilter(ivMinInp ? ivMinInp.value : '');
+      pokesIvMax = parseNumFilter(ivMaxInp ? ivMaxInp.value : '');
+      pokesQualMin = parseNumFilter(qualMinInp ? qualMinInp.value : '');
+      pokesQualMax = parseNumFilter(qualMaxInp ? qualMaxInp.value : '');
       pokesRenderLimit = 100;
+      if (clearFiltersBtn) {
+        const hasRangeFilter = pokesIvMin != null || pokesIvMax != null || pokesQualMin != null || pokesQualMax != null;
+        clearFiltersBtn.style.display = hasRangeFilter ? 'inline-flex' : 'none';
+      }
       window.renderPokesTable();
     };
 
@@ -1862,7 +1885,19 @@
       if (ov && ov.classList.contains('show')) {
         window.closePokesModal();
       } else {
-        window.openPokesMconst setupReloadUi = function() {
+        window.openPokesModal();
+      }
+    };
+
+    if (target && target.nextSibling) {
+      topbar.insertBefore(btn, target.nextSibling);
+    } else {
+      topbar.appendChild(btn);
+    }
+  };
+
+  // Re-enlazar botón "Refrescar UI" para garantizar recarga con cache-busting y limpieza de modals
+  const setupReloadUi = function() {
     const btn = document.getElementById('reloadUi');
     if (btn && !btn.__customReloadBound) {
       btn.__customReloadBound = true;
@@ -1914,18 +1949,6 @@
         } catch (err) {
           btn.disabled = false;
           btn.textContent = origText;
-          console.error('Error al refrescar UI:', err);
-        }
-      };
-    }
-  };
-
-  // Tecla Escape cierra modal de Pokémon si está abierto
-      };
-            document.body.appendChild(s2);
-          };
-          document.body.appendChild(s);
-        } catch (err) {
           console.error('Error al refrescar UI:', err);
         }
       };
