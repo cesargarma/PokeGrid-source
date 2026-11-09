@@ -158,6 +158,76 @@
       font-size: 14px !important;
       padding: 4px 9px !important;
     }
+    .pk-presets-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: rgba(1, 4, 9, 0.45);
+      border-bottom: 1px solid var(--bd2, #30363d);
+      overflow-x: auto;
+    }
+    .pk-presets-bar::-webkit-scrollbar {
+      height: 4px;
+    }
+    .pk-presets-bar::-webkit-scrollbar-thumb {
+      background: var(--bd2, #30363d);
+      border-radius: 2px;
+    }
+    .pk-preset-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 11px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 999px;
+      color: var(--mut, #8b949e);
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .pk-preset-btn:hover {
+      border-color: var(--mut, #8b949e);
+      color: var(--tx, #e6edf3);
+    }
+    .pk-preset-btn.on {
+      background: rgba(242, 198, 101, 0.12);
+      border-color: var(--gold, #f2c665);
+      color: var(--gold, #f2c665);
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(242, 198, 101, 0.15);
+    }
+    .pk-preset-count {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      font-variant-numeric: tabular-nums;
+    }
+    .pk-preset-btn.on .pk-preset-count {
+      background: rgba(242, 198, 101, 0.22);
+    }
+    .pk-load-more-btn {
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--tx, #e6edf3);
+      padding: 6px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pk-load-more-btn:hover {
+      background: var(--bd, #21262d);
+      border-color: #388bfd;
+      color: #388bfd;
+    }
     .pk-toolbar {
       display: flex;
       align-items: center;
@@ -759,15 +829,26 @@
   };
 
   // =========================================================================
-  // VISTA Y MODAL DE POKÉMON LV 300+ DE TODAS LAS CUENTAS
+  // VISTA Y MODAL DE POKÉMON MULTI-FILTRO DE TODAS LAS CUENTAS
   // =========================================================================
   window.__pokes300Data = window.__pokes300Data || [];
   let pokesSortKey = 'level';
   let pokesSortAsc = false;
   let pokesTrainerFilter = 'all';
+  let pokesPreset = 'lv300';
+  let pokesRenderLimit = 100;
   let pokesSearchText = '';
   let pokesShinyOnly = false;
   let pokesIsLoading = false;
+
+  const POKES_PRESETS = [
+    { id: 'lv300', label: 'Nv 300+', badge: 'Nv 300+', test: pk => +pk.level >= 300, defaultSort: 'level', defaultAsc: false },
+    { id: 'team', label: 'En Equipo ⚔️', badge: 'En Equipo ⚔️', test: pk => !!pk.team, defaultSort: 'trainer', defaultAsc: true },
+    { id: 'iv160', label: 'IV 160+ ⭐', badge: 'IV 160+ ⭐', test: pk => pk.ivTotal != null && +pk.ivTotal >= 160, defaultSort: 'ivTotal', defaultAsc: false },
+    { id: 'epic', label: 'Épica+ (×1.5) 💎', badge: 'Épica+ 💎', test: pk => +pk.quality >= 1.5, defaultSort: 'quality', defaultAsc: false },
+    { id: 'ditto', label: 'Dittos 🧬', badge: 'Dittos 🧬', test: pk => !!pk.isDitto || /ditto/i.test(pk.name), defaultSort: 'quality', defaultAsc: false },
+    { id: 'all', label: 'Todos 🌐', badge: 'Todos 🌐', test: () => true, defaultSort: 'level', defaultAsc: false }
+  ];
 
   const TIPO_COR = {
     normal:'#a8a878', fire:'#f08030', water:'#6890f0', electric:'#f8d030', grass:'#78c850', ice:'#98d8d8',
@@ -801,34 +882,32 @@
       for (const p of pokes) {
         if (!p) continue;
         const lv = +p.level || 0;
-        if (lv >= 300) {
-          const s = (p.stats && typeof p.stats === 'object') ? p.stats : p;
-          const hp = +(s.hp != null ? s.hp : s.maxHp != null ? s.maxHp : s.totalHp || 0);
-          const atk = +(s.atk != null ? s.atk : s.attack || 0);
-          const def = +(s.def != null ? s.def : s.defense || 0);
-          const spa = +(s.spa != null ? s.spa : s.spAtk != null ? s.spAtk : s.spatk != null ? s.spatk : s.specialAttack || 0);
-          const spd = +(s.spd != null ? s.spd : s.spDef != null ? s.spDef : s.spdef != null ? s.spdef : s.specialDefense || 0);
-          const vel = +(s.vel != null ? s.vel : s.speed || 0);
-          const parsedStats = (hp > 0 && atk > 0 && def > 0 && spa > 0 && spd > 0 && vel > 0) ? { hp, atk, def, spa, spd, vel } : null;
+        const s = (p.stats && typeof p.stats === 'object') ? p.stats : p;
+        const hp = +(s.hp != null ? s.hp : s.maxHp != null ? s.maxHp : s.totalHp || 0);
+        const atk = +(s.atk != null ? s.atk : s.attack || 0);
+        const def = +(s.def != null ? s.def : s.defense || 0);
+        const spa = +(s.spa != null ? s.spa : s.spAtk != null ? s.spAtk : s.spatk != null ? s.spatk : s.specialAttack || 0);
+        const spd = +(s.spd != null ? s.spd : s.spDef != null ? s.spDef : s.spdef != null ? s.spdef : s.specialDefense || 0);
+        const vel = +(s.vel != null ? s.vel : s.speed || 0);
+        const parsedStats = (hp > 0 && atk > 0 && def > 0 && spa > 0 && spd > 0 && vel > 0) ? { hp, atk, def, spa, spd, vel } : null;
 
-          res.push({
-            id: p.id != null ? String(p.id) : '',
-            name: p.name || '?',
-            level: lv,
-            shiny: !!p.shiny,
-            quality: +(+p.quality || 1).toFixed(2),
-            ivTotal: p.ivTotal != null ? Math.round(+p.ivTotal) : null,
-            power: +p.power || 0,
-            team: !!p.team,
-            slot: p.slot != null ? p.slot : null,
-            leader: !!p.leader,
-            speciesId: +p.speciesId || +p.pokeId || 0,
-            type1: p.type1 ? String(p.type1).toUpperCase() : '',
-            type2: p.type2 ? String(p.type2).toUpperCase() : '',
-            isDitto: !!p.isDitto,
-            stats: parsedStats
-          });
-        }
+        res.push({
+          id: p.id != null ? String(p.id) : '',
+          name: p.name || '?',
+          level: lv,
+          shiny: !!p.shiny,
+          quality: +(+p.quality || 1).toFixed(2),
+          ivTotal: p.ivTotal != null ? Math.round(+p.ivTotal) : null,
+          power: +p.power || 0,
+          team: !!p.team,
+          slot: p.slot != null ? p.slot : null,
+          leader: !!p.leader,
+          speciesId: +p.speciesId || +p.pokeId || 0,
+          type1: p.type1 ? String(p.type1).toUpperCase() : '',
+          type2: p.type2 ? String(p.type2).toUpperCase() : '',
+          isDitto: !!p.isDitto,
+          stats: parsedStats
+        });
       }
       return { ok: true, name: tName, list: res };
     } catch (err) {
@@ -852,7 +931,7 @@
               <path d="M2 12h20"/>
               <circle cx="12" cy="12" r="3.5" fill="var(--sf2,#1c2128)"/>
             </svg>
-            <h2>Pokémon <span class="pk-badge-lv">Nv 300+</span></h2>
+            <h2>Pokémon <span class="pk-badge-lv" id="pkPresetBadge">Nv 300+</span></h2>
             <span class="pk-badge-count" id="pkTotalCount">0 encontrados</span>
           </div>
           <div class="pk-hd-actions">
@@ -860,6 +939,8 @@
             <button id="pkCloseBtn" class="pk-close-btn" title="Cerrar (Esc)">✕</button>
           </div>
         </div>
+
+        <div class="pk-presets-bar" id="pkPresetsBar"></div>
 
         <div class="pk-toolbar">
           <div class="pk-search-box">
@@ -892,7 +973,7 @@
             <span>Cargando Pokémon de todas las cuentas...</span>
           </div>
           <div id="pkEmpty" class="pk-state-msg" style="display:none">
-            <span>No se encontraron Pokémon de nivel 300+ con los filtros actuales.</span>
+            <span>No se encontraron Pokémon con los filtros actuales.</span>
           </div>
         </div>
       </div>
@@ -915,6 +996,7 @@
     if (searchInput) {
       searchInput.oninput = (e) => {
         pokesSearchText = (e.target.value || '').trim().toLowerCase();
+        pokesRenderLimit = 100;
         window.renderPokesTable();
       };
     }
@@ -923,6 +1005,7 @@
     if (shinyBtn) {
       shinyBtn.onclick = () => {
         pokesShinyOnly = !pokesShinyOnly;
+        pokesRenderLimit = 100;
         shinyBtn.classList.toggle('on', pokesShinyOnly);
         window.renderPokesTable();
       };
@@ -943,6 +1026,45 @@
     });
 
     return ov;
+  };
+
+  // Actualizar botones de presets y sus contadores dinámicos
+  window.updatePresetPills = function() {
+    const ov = document.getElementById('pokesOverlay');
+    if (!ov) return;
+    const bar = ov.querySelector('#pkPresetsBar');
+    if (!bar) return;
+
+    const list = window.__pokes300Data || [];
+    const trainerFiltered = list.filter(pk => {
+      if (pokesTrainerFilter !== 'all' && String(pk.accIdx) !== pokesTrainerFilter) return false;
+      return true;
+    });
+
+    bar.innerHTML = POKES_PRESETS.map(pr => {
+      const isSel = pokesPreset === pr.id;
+      const count = trainerFiltered.filter(pr.test).length;
+      return `<button class="pk-preset-btn${isSel ? ' on' : ''}" data-preset="${pr.id}" title="${pr.label}">
+        <span>${pr.label}</span>
+        <span class="pk-preset-count">${count}</span>
+      </button>`;
+    }).join('');
+
+    bar.querySelectorAll('.pk-preset-btn').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.preset;
+        if (pokesPreset === id) return;
+        pokesPreset = id;
+        pokesRenderLimit = 100;
+        const pr = POKES_PRESETS.find(p => p.id === id);
+        if (pr && pr.defaultSort) {
+          pokesSortKey = pr.defaultSort;
+          pokesSortAsc = !!pr.defaultAsc;
+        }
+        window.updatePresetPills();
+        window.renderPokesTable();
+      };
+    });
   };
 
   // Abrir y cerrar modal
@@ -1015,10 +1137,10 @@
         activeTrainers.push({ idx, name: fallbackName, dot });
       }
 
-      // Si el webview no devolvió lista pero hay equipo en stCache con nivel >= 300, incluirlo
+      // Si el webview no devolvió lista pero hay equipo en stCache, incluirlo
       const team = (stCache[idx] && stCache[idx].d && Array.isArray(stCache[idx].d.team)) ? stCache[idx].d.team : [];
       team.forEach(tp => {
-        if (tp && +tp.level >= 300) {
+        if (tp) {
           const already = allPokes.some(x => x.accIdx === idx && (x.id === tp.id || (x.name === tp.name && x.level === tp.level)));
           if (!already) {
             allPokes.push({
@@ -1027,7 +1149,7 @@
               dotColor: dot,
               id: tp.id || '',
               name: tp.name || '?',
-              level: +tp.level,
+              level: +tp.level || 1,
               shiny: !!tp.shiny,
               quality: +(+tp.q || 1).toFixed(2),
               ivTotal: tp.ivt != null ? Math.round(+tp.ivt) : null,
@@ -1056,6 +1178,7 @@
     if (loadingEl) loadingEl.style.display = 'none';
 
     window.updateTrainerChips();
+    window.updatePresetPills();
     window.renderPokesTable();
   };
 
@@ -1082,7 +1205,9 @@
     container.querySelectorAll('.pk-chip').forEach(chip => {
       chip.onclick = () => {
         pokesTrainerFilter = chip.dataset.acc;
+        pokesRenderLimit = 100;
         window.updateTrainerChips();
+        window.updatePresetPills();
         window.renderPokesTable();
       };
     });
@@ -1104,9 +1229,14 @@
     const list = window.__pokes300Data || [];
     if (totalCountEl) totalCountEl.textContent = list.length + ' encontrados';
 
+    const curPreset = POKES_PRESETS.find(p => p.id === pokesPreset) || POKES_PRESETS[0];
+    const badgeEl = ov.querySelector('#pkPresetBadge');
+    if (badgeEl) badgeEl.textContent = curPreset.badge;
+
     // Filtrar
     const filtered = list.filter(pk => {
       if (pokesTrainerFilter !== 'all' && String(pk.accIdx) !== pokesTrainerFilter) return false;
+      if (!curPreset.test(pk)) return false;
       if (pokesShinyOnly && !pk.shiny) return false;
       if (pokesSearchText) {
         const nm = String(pk.name || '').toLowerCase();
@@ -1121,13 +1251,22 @@
 
     // Ordenar
     filtered.sort((a, b) => {
+      if (pokesSortKey === 'trainer') {
+        const trA = (a.accIdx != null ? a.accIdx : 99);
+        const trB = (b.accIdx != null ? b.accIdx : 99);
+        if (trA !== trB) return pokesSortAsc ? trA - trB : trB - trA;
+        if (a.team && b.team) {
+          const sA = a.slot != null ? a.slot : (a.leader ? 0 : 99);
+          const sB = b.slot != null ? b.slot : (b.leader ? 0 : 99);
+          if (sA !== sB) return pokesSortAsc ? sA - sB : sB - sA;
+        }
+        return (b.level || 0) - (a.level || 0);
+      }
+
       let va = a[pokesSortKey];
       let vb = b[pokesSortKey];
 
-      if (pokesSortKey === 'trainer') {
-        va = (a.trainerName || '') + a.accIdx;
-        vb = (b.trainerName || '') + b.accIdx;
-      } else if (pokesSortKey === 'name') {
+      if (pokesSortKey === 'name') {
         va = String(a.name || '').toLowerCase();
         vb = String(b.name || '').toLowerCase();
       } else {
@@ -1151,7 +1290,7 @@
     });
 
     if (filteredCountEl) {
-      filteredCountEl.textContent = 'Mostrando ' + filtered.length + ' de ' + list.length;
+      filteredCountEl.textContent = 'Mostrando ' + Math.min(filtered.length, pokesRenderLimit) + ' de ' + filtered.length + ' (' + list.length + ' total)';
     }
 
     if (!filtered.length) {
@@ -1164,8 +1303,12 @@
 
     if (emptyEl) emptyEl.style.display = 'none';
 
+    // Lista visible con paginación progresiva para mantener respuesta instantánea
+    const visibleList = filtered.slice(0, pokesRenderLimit);
+    const hasMore = filtered.length > pokesRenderLimit;
+
     // Generar filas
-    tbody.innerHTML = filtered.map((pk, idx) => {
+    let rowsHtml = visibleList.map((pk, idx) => {
       const spriteUrl = pk.speciesId ? ('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + (pk.shiny ? 'shiny/' : '') + pk.speciesId + '.png') : '';
       const fallbackSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg>';
       const spriteImg = spriteUrl ? ('<img src="' + spriteUrl + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span style="display:none">' + fallbackSvg + '</span>') : fallbackSvg;
@@ -1180,6 +1323,12 @@
       const ivColor = ivPct != null ? POT_COR(ivPct) : '#8b949e';
 
       const nf = (n) => (n == null ? '–' : Math.round(n).toLocaleString('pt-BR'));
+
+      const teamBadge = pk.leader
+        ? '<span class="pk-team-badge" style="background:rgba(242,198,101,.18);color:var(--gold,#f2c665);border-color:rgba(242,198,101,.35);font-weight:700">⚔️ Líder</span>'
+        : pk.team
+          ? '<span class="pk-team-badge">Equipo' + (pk.slot != null ? ' #' + (+pk.slot + 1) : '') + '</span>'
+          : '';
 
       return `
         <tr class="pk-row" data-pk-idx="${idx}">
@@ -1196,7 +1345,7 @@
                 <div class="pk-poke-name-row">
                   <span class="pk-poke-name">${pk.name}</span>
                   ${pk.shiny ? '<span class="pk-shiny-badge" title="Shiny">✨</span>' : ''}
-                  ${pk.team ? '<span class="pk-team-badge">Equipo</span>' : ''}
+                  ${teamBadge}
                 </div>
                 <div class="pk-types-row">${typesHtml}</div>
               </div>
@@ -1230,17 +1379,39 @@
       `;
     }).join('');
 
+    if (hasMore) {
+      rowsHtml += `
+        <tr class="pk-load-more-row">
+          <td colspan="6" style="text-align:center;padding:12px 16px;background:rgba(0,0,0,0.15)">
+            <button class="pk-load-more-btn" id="pkLoadMoreBtn">Cargar más (+100) — Mostrando ${visibleList.length} de ${filtered.length}</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    tbody.innerHTML = rowsHtml;
+
+    // Asignar clic para cargar más
+    const loadMoreBtn = tbody.querySelector('#pkLoadMoreBtn');
+    if (loadMoreBtn) {
+      loadMoreBtn.onclick = () => {
+        pokesRenderLimit += 100;
+        window.renderPokesTable();
+      };
+    }
+
     // Asignar clic para abrir el modal de IVs
     tbody.querySelectorAll('.pk-row').forEach(row => {
       row.onclick = () => {
         const pkIdx = +row.dataset.pkIdx;
-        const pk = filtered[pkIdx];
+        const pk = visibleList[pkIdx];
         if (pk) {
           window.openPokemonIv(pk, pk.accIdx);
         }
       };
     });
   };
+
 
   // Pre-cargar base stats de todas las criaturas desde creatures.json a través de cualquier webview activo o del estado
   window.ensureCreaturesBaseStats = async function() {
@@ -1475,7 +1646,7 @@
     const target = document.getElementById('ocBtn') || document.getElementById('ivsBtn');
     const btn = document.createElement('button');
     btn.id = 'pokesBtn';
-    btn.title = 'Pokémon (Nv 300+)\nVer todos los Pokémon de nivel 300 o más de todas las cuentas';
+    btn.title = 'Pokémon\nVer Pokémon de todas las cuentas con filtros rápidos (Nv 300+, En Equipo, IV 160+, Épicas, Dittos, etc.)';
     btn.setAttribute('aria-label', 'Pokémon');
     btn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;font-weight:600;background:transparent;border:1px solid transparent;border-radius:6px;color:#c9d1d9;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease;';
 
