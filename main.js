@@ -290,6 +290,9 @@ app.on('web-contents-created', (_e, contents) => {
     if (input.type === 'keyDown' && input.key === 'Escape' && !input.isAutoRepeat) {
       try { contents.hostWebContents && contents.hostWebContents.send('hotkey', 'collapse'); } catch {}
     }
+    if (input.type === 'keyDown' && (input.key === 'F5' || (input.control && String(input.key).toLowerCase() === 'r')) && !input.isAutoRepeat) {
+      try { contents.hostWebContents && contents.hostWebContents.send('hotkey', 'reloadUi'); } catch {}
+    }
   });
   // clique direito no jogo: modo foco (expande/volta). Campo editavel fica de fora,
   // senao o clique de colar num input viraria tela cheia.
@@ -549,7 +552,9 @@ app.whenReady().then(() => {
           label: `Expandir painel ${n}`, accelerator: `CmdOrCtrl+${n}`,
           click: () => win.webContents.send('hotkey', 'expand' + (n - 1))
         })),
-        { label: 'Mudo', accelerator: 'CmdOrCtrl+M', click: () => win.webContents.send('hotkey', 'mute') }
+        { label: 'Mudo', accelerator: 'CmdOrCtrl+M', click: () => win.webContents.send('hotkey', 'mute') },
+        { label: 'Recarregar interface', accelerator: 'CmdOrCtrl+R', click: () => win.webContents.send('hotkey', 'reloadUi') },
+        { label: 'Recarregar interface (F5)', accelerator: 'F5', click: () => win.webContents.send('hotkey', 'reloadUi') }
       ]
     }
   ]));
