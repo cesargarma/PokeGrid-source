@@ -1,0 +1,134 @@
+// test/bosses-simulador.test.js - Test suite para el Simulador de Bosses y Optimizador de Equipos
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+
+console.log('=== TEST SUITE: SIMULADOR DE BOSSES & OPTIMIZADOR ===');
+
+// Leer custom-ui.js
+const customUiSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'custom-ui.js'), 'utf8');
+
+// 1. Verificar presencia de componentes clave en custom-ui.js
+assert.ok(customUiSrc.includes('#bossesOverlay'), 'El modal #bossesOverlay debe estar estilizado en custom-ui.js');
+assert.ok(customUiSrc.includes('mountBossesButton'), 'window.mountBossesButton debe estar implementado');
+assert.ok(customUiSrc.includes('BOSSES_CONFIG'), 'BOSSES_CONFIG debe estar configurado');
+assert.ok(customUiSrc.includes('CLAN_TYPES_TABLE'), 'CLAN_TYPES_TABLE debe estar definido con los 10 clanes');
+assert.ok(customUiSrc.includes('getHeldItemBonus'), 'getHeldItemBonus debe reconocer held items');
+assert.ok(customUiSrc.includes('evaluateCandidateVsBoss'), 'evaluateCandidateVsBoss debe existir');
+assert.ok(customUiSrc.includes('simulateTeamBattle'), 'simulateTeamBattle debe existir');
+assert.ok(customUiSrc.includes('initBossesModal'), 'initBossesModal debe estar presente');
+assert.ok(customUiSrc.includes('renderBossesModal'), 'renderBossesModal debe estar presente');
+
+console.log('OK  Componentes DOM y funciones exportadas verificadas');
+
+// Extraer funciones y objetos para pruebas directas en contexto aislado
+const extractSnippet = (startMarker, endMarker) => {
+  const i = customUiSrc.indexOf(startMarker);
+  assert.ok(i !== -1, 'No se encontró ' + startMarker);
+  const j = customUiSrc.indexOf(endMarker, i);
+  assert.ok(j !== -1, 'No se encontró ' + endMarker);
+  return customUiSrc.slice(i, j);
+};
+
+const moduleCode = extractSnippet('const BOSSES_CONFIG = {', 'window.initBossesModal = function() {');
+const sandbox = {};
+const fn = new Function('sandbox', moduleCode + '\n' + `
+  sandbox.BOSSES_CONFIG = BOSSES_CONFIG;
+  sandbox.CLAN_TYPES_TABLE = CLAN_TYPES_TABLE;
+  sandbox.RARITY_THEME = RARITY_THEME;
+  sandbox.getHeldItemBonus = getHeldItemBonus;
+  sandbox.evaluateCandidateVsBoss = evaluateCandidateVsBoss;
+  sandbox.simulateTeamBattle = simulateTeamBattle;
+`);
+fn(sandbox);
+
+const { BOSSES_CONFIG, CLAN_TYPES_TABLE, getHeldItemBonus, evaluateCandidateVsBoss, simulateTeamBattle } = sandbox;
+
+// 2. Verificar configuración de los Bosses activos
+assert.ok(BOSSES_CONFIG.cruel, 'Giant Cruel debe existir');
+assert.equal(BOSSES_CONFIG.cruel.level, 600, 'Giant Cruel debe ser nivel 600');
+assert.equal(BOSSES_CONFIG.cruel.hp, 4200000, 'Giant Cruel debe tener 4.2M HP');
+assert.ok(BOSSES_CONFIG.cruel.drops.length >= 8, 'Giant Cruel debe tener al menos 8 drops definidos');
+
+assert.ok(BOSSES_CONFIG.aerodactyl2, 'Ancient Aero debe existir');
+assert.equal(BOSSES_CONFIG.aerodactyl2.level, 500, 'Ancient Aero debe ser nivel 500');
+assert.equal(BOSSES_CONFIG.aerodactyl2.hp, 2300000, 'Ancient Aero debe tener 2.3M HP');
+assert.ok(BOSSES_CONFIG.aerodactyl2.drops.length >= 8, 'Ancient Aero debe tener al menos 8 drops definidos');
+
+console.log('OK  BOSSES_CONFIG validado (Giant Cruel 4.2M HP, Ancient Aero 2.3M HP)');
+
+// 3. Verificar tabla de Clanes
+assert.ok(CLAN_TYPES_TABLE.naturia.includes('GRASS') && CLAN_TYPES_TABLE.naturia.includes('BUG'), 'Naturia debe incluir Grass y Bug');
+assert.ok(CLAN_TYPES_TABLE.seavell.includes('WATER') && CLAN_TYPES_TABLE.seavell.includes('ICE'), 'Seavell debe incluir Water e Ice');
+assert.ok(CLAN_TYPES_TABLE.orebound.includes('ROCK'), 'Orebound debe incluir Rock');
+assert.ok(CLAN_TYPES_TABLE.gardestrike.includes('NORMAL') && CLAN_TYPES_TABLE.gardestrike.includes('FIGHTING'), 'Gardestrike debe incluir Normal y Fighting');
+
+console.log('OK  CLAN_TYPES_TABLE validada con afinidades oficiales');
+
+// 4. Verificar multiplicadores de Held Items
+const vit = getHeldItemBonus('X-Vitality');
+assert.equal(vit.hp, 1.15, 'X-Vitality debe dar +15% HP');
+assert.equal(vit.atk, 1.0, 'X-Vitality no debe alterar Atk');
+
+const atk = getHeldItemBonus('X-Attack');
+assert.equal(atk.atk, 1.15, 'X-Attack debe dar +15% Atk');
+
+const def = getHeldItemBonus('X-Defense');
+assert.equal(def.def, 1.15, 'X-Defense debe dar +15% Def');
+
+const boost = getHeldItemBonus('X-Boost');
+assert.equal(boost.atk, 1.10, 'X-Boost debe dar +10% Atk');
+assert.equal(boost.def, 1.10, 'X-Boost debe dar +10% Def');
+
+console.log('OK  Held Items aplicados (+15% HP, +15% Atk, +15% Def, +10% Boost)');
+
+// 5. Verificar cálculo de sinergia de Clan (+15% ATK)
+const pokeGrass = { name: 'Venusaur', level: 400, quality: 1.5, type1: 'GRASS', type2: 'POISON', stats: { hp: 4000, atk: 1200, def: 1000, spa: 1200, spd: 1000, vel: 800 } };
+const evalNoClan = evaluateCandidateVsBoss(pokeGrass, BOSSES_CONFIG.cruel, null);
+const evalNaturia = evaluateCandidateVsBoss(pokeGrass, BOSSES_CONFIG.cruel, 'naturia');
+assert.equal(evalNoClan.clanMult, 1.0, 'Sin clan el multiplicador debe ser 1.0');
+assert.equal(evalNaturia.clanMult, 1.15, 'Con clan Naturia Venusaur debe recibir +15% de sinergia');
+assert.ok(evalNaturia.effectiveAtk > evalNoClan.effectiveAtk, 'Ataque efectivo debe ser mayor con clan');
+
+console.log('OK  Sinergia de clan evaluada (+15% ATK aplicado en Venusaur [Naturia])');
+
+// 6. Prueba de combate: Victoria en Equipo
+const team = [
+  { name: 'Tyranitar', level: 689, quality: 1.8, type1: 'ROCK', type2: 'DARK', power: 22000, stats: { hp: 7500, atk: 1900, def: 1800, spa: 1600, spd: 1600, vel: 1200 }, clan: 'orebound', heldItem: 'X-Vitality' },
+  { name: 'Exeggutor', level: 626, quality: 1.8, type1: 'GRASS', type2: 'PSYCHIC', power: 18000, stats: { hp: 5500, atk: 1500, def: 1300, spa: 1600, spd: 1100, vel: 1200 }, clan: 'naturia', heldItem: 'X-Boost' },
+  { name: 'Dragonite', level: 525, quality: 1.8, type1: 'DRAGON', type2: 'FLYING', power: 16000, stats: { hp: 5800, atk: 1600, def: 1100, spa: 1300, spd: 1200, vel: 1100 }, clan: 'wingeon', heldItem: 'X-Attack' },
+  { name: 'Rampardos', level: 480, quality: 1.77, type1: 'ROCK', power: 14000, stats: { hp: 4800, atk: 1650, def: 850, spa: 500, spd: 700, vel: 800 }, clan: 'orebound', heldItem: '' },
+  { name: 'Snorlax', level: 450, quality: 1.8, type1: 'NORMAL', power: 13000, stats: { hp: 6500, atk: 1100, def: 950, spa: 600, spd: 1200, vel: 300 }, clan: 'gardestrike', heldItem: 'X-Vitality' },
+  { name: 'Rhyperior', level: 420, quality: 1.7, type1: 'GROUND', type2: 'ROCK', power: 12000, stats: { hp: 5200, atk: 1400, def: 1300, spa: 500, spd: 700, vel: 400 }, clan: 'orebound', heldItem: 'X-Defense' }
+];
+
+const resAero = simulateTeamBattle(team, BOSSES_CONFIG.aerodactyl2, null);
+assert.equal(resAero.victory, true, 'El equipo debe vencer a Ancient Aero');
+assert.equal(resAero.soloKill, false, 'No fue solo-kill (requirió 2 luchadores)');
+assert.ok(resAero.members[2].didNotEnter, 'El slot 3 no debió entrar (quedó en reserva)');
+assert.ok(resAero.members[3].didNotEnter, 'El slot 4 no debió entrar (quedó en reserva)');
+
+console.log('OK  Simulación vs Ancient Aero: Victoria en equipo con reserva ilesa');
+
+// 7. Prueba de combate: Solo-Kill
+const soloGodSnorlax = [
+  { name: 'Ultra Snorlax', level: 850, quality: 2.2, type1: 'NORMAL', power: 38000, stats: { hp: 14000, atk: 2400, def: 2200, spa: 1000, spd: 2200, vel: 400 }, clan: 'gardestrike', heldItem: 'X-Vitality' }
+];
+const resSolo = simulateTeamBattle(soloGodSnorlax, BOSSES_CONFIG.aerodactyl2, 'gardestrike');
+assert.equal(resSolo.victory, true, 'Ultra Snorlax debe vencer');
+assert.equal(resSolo.soloKill, true, 'Debe marcarse como SOLO-KILL');
+
+console.log('OK  Simulación Solo-Kill: Ultra Snorlax derrota a Ancient Aero en solitario');
+
+// 8. Prueba de combate: Daño Insuficiente / Derrota
+const weakTeam = [
+  { name: 'Rattata', level: 50, quality: 1.0, type1: 'NORMAL', stats: { hp: 300, atk: 100, def: 80, spa: 50, spd: 70, vel: 120 } }
+];
+const resDefeat = simulateTeamBattle(weakTeam, BOSSES_CONFIG.cruel, null);
+assert.equal(resDefeat.victory, false, 'Equipo débil debe ser derrotado');
+assert.ok(resDefeat.remainingBossHp > 0, 'Debe quedar vida en el boss');
+assert.ok(resDefeat.bossHpPctRemaining > 90, 'El boss debe conservar casi toda la vida');
+
+console.log('OK  Simulación Derrota: Equipo débil fainted y vida restante del boss correcta');
+
+console.log('\n¡TODAS LAS PRUEBAS DEL SIMULADOR DE BOSSES PASARON AL 100%!');
