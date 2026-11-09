@@ -1294,7 +1294,26 @@ const HOME_URL  = 'https://poke.idleworld.online/?ref=CJNKGPB'; // link do refer
       // do main.js (que nega o popup e manda o link pro navegador de fora): o botao de wiki nao abria nada
       wv.setAttribute('allowpopups', '');
       wv.partition = 'persist:conta' + (i + 1);
-      wv.src = START_URL;
+      let uInit = START_URL;
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          const uSalva = (sessionStorage.getItem('pg_last_url_' + i) || '').trim();
+          if (uSalva.startsWith('https://poke.idleworld.online/') && !uSalva.includes('/login') && !uSalva.includes('/register') && !uSalva.includes('/forgot')) {
+            uInit = uSalva;
+          }
+        }
+      } catch {}
+      wv.src = uInit;
+      const guardaUrl = () => {
+        try {
+          const u = wv && wv.getURL && wv.getURL();
+          if (u && u.startsWith('https://poke.idleworld.online/') && !u.includes('/login') && typeof sessionStorage !== 'undefined') {
+            sessionStorage.setItem('pg_last_url_' + i, u);
+          }
+        } catch {}
+      };
+      wv.addEventListener('did-navigate', guardaUrl);
+      wv.addEventListener('did-navigate-in-page', guardaUrl);
       panel.appendChild(wv);
       grid.appendChild(panel);
       webviews.push(wv);
@@ -2809,13 +2828,13 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     if (e.key === 'Escape') sairDoFoco();
     if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
       e.preventDefault();
-      location.reload();
+      refrescarUi();
     }
   });
   window.pokeAPI?.onHotkey?.((k) => {
     if (k === 'mute') muteBtn.click();
     else if (k === 'collapse') sairDoFoco();
-    else if (k === 'reloadUi') location.reload();
+    else if (k === 'reloadUi') refrescarUi();
     else if (k.lastIndexOf('ctx', 0) === 0) { // clique direito no jogo: modo foco
       const id = +k.slice(3);
       const ix = webviews.findIndex(w => { try { return w && w.getWebContentsId() === id; } catch { return false; } });
@@ -2831,7 +2850,28 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     topo(refBtn, 'ok', t('refCopied')); // o "Copiado!" tambem no aria-label
     setTimeout(() => soIco(refBtn, 'link', t('refTitle')), 1500);
   };
-  document.getElementById('reloadUi').onclick = () => location.reload();
+  const refrescarUi = () => {
+    webviews.forEach((w, i) => {
+      try {
+        const u = w && w.getURL && w.getURL();
+        if (u && u.startsWith('https://poke.idleworld.online/') && !u.includes('/login')) {
+          sessionStorage.setItem('pg_last_url_' + i, u);
+        }
+      } catch {}
+    });
+    location.reload();
+  };
+  window.addEventListener('beforeunload', () => {
+    webviews.forEach((w, i) => {
+      try {
+        const u = w && w.getURL && w.getURL();
+        if (u && u.startsWith('https://poke.idleworld.online/') && !u.includes('/login')) {
+          sessionStorage.setItem('pg_last_url_' + i, u);
+        }
+      } catch {}
+    });
+  });
+  document.getElementById('reloadUi').onclick = () => refrescarUi();
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) { lastLogin[i] = 0; try { w.reloadIgnoringCache(); } catch { w.reload(); } } }); // ignora cache: resolve pagina de login velha em cache (sem captcha)
   document.getElementById('faqBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/FAQ.md');
   document.getElementById('manBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/MANUAL.md');
@@ -4927,6 +4967,17 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
             + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;padding:2px 0">'
             + '<span style="display:inline-flex;align-items:center;gap:6px;color:var(--tx2)"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 4px var(--ok)"></span>Ultra Potion</span>'
             + '<b style="color:var(--tx);font-variant-numeric:tabular-nums;font-size:12px">' + fmtQty(up) + '</b></div>'
+            + '</div></div>'
+            + '<div>'
+            + '<div style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:5px">'
+            + '<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" style="flex:none"><circle cx="8" cy="8" r="6.5" fill="#f2c665" stroke="#a9781f" stroke-width="1"/><circle cx="8" cy="8" r="4.2" fill="none" stroke="#c9922f" stroke-width="1"/><path d="M5 4.3a4.5 4.5 0 0 1 3.5-1" stroke="#fff2c8" stroke-width="1" fill="none" stroke-linecap="round" opacity=".85"/></svg><span>' + (t('cdCurrencies') || 'Divisas') + '</span></div>'
+            + '<div style="display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,.02);border:1px solid var(--bd);border-radius:6px;padding:4px 8px">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;padding:2px 0">'
+            + '<span style="display:inline-flex;align-items:center;gap:6px;color:var(--tx2)"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 4px var(--gold)"></span>' + (t('cdMoney') || 'Dinero') + '</span>'
+            + '<b style="color:var(--gold);font-variant-numeric:tabular-nums;font-size:12px">$' + nf(+r.gold || 0) + '</b></div>'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11.5px;padding:2px 0;border-top:1px solid rgba(255,255,255,.04)">'
+            + '<span style="display:inline-flex;align-items:center;gap:6px;color:var(--tx2)"><span style="width:6px;height:6px;border-radius:50%;background:#5bc0ff;box-shadow:0 0 4px #5bc0ff"></span>' + (t('cdDiamonds') || 'Diamantes') + '</span>'
+            + '<b style="color:var(--dia);font-variant-numeric:tabular-nums;font-size:12px">' + nf(+r.diamonds || 0) + '</b></div>'
             + '</div></div>'
             + '</div>')
           + '</div>';
