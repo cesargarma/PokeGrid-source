@@ -1567,6 +1567,26 @@
     return pct >= 90 ? '#f2c665' : pct >= 75 ? '#3fb950' : pct >= 55 ? '#79c0ff' : pct >= 35 ? '#8b949e' : '#f85149';
   };
 
+  const toDexId = (speciesId) => {
+    let id = +speciesId || 0;
+    if (typeof window.dexId === 'function') {
+      const d = window.dexId(id);
+      if (d) return d;
+    }
+    const state = typeof window.pgGetState === 'function' ? window.pgGetState() : {};
+    const formDex = state.formDex || window.formDex || {};
+    if (formDex[id]) return +formDex[id] || id;
+    if (id >= 13000 && id < 14000) return id - 13000;
+    if (id >= 14000 && id < 15000) return id - 14000;
+    return id;
+  };
+
+  const getPokeSpriteUrl = (speciesId, shiny = false) => {
+    const id = toDexId(speciesId);
+    if (!id) return '';
+    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + (shiny ? 'shiny/' : '') + id + '.png';
+  };
+
   const POKES_LV300_QUERY = `(() => {
     try {
       const P = window.__poke;
@@ -2149,9 +2169,9 @@
 
     // Generar filas
     let rowsHtml = visibleList.map((pk, idx) => {
-      const spriteUrl = pk.speciesId ? ('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + (pk.shiny ? 'shiny/' : '') + pk.speciesId + '.png') : '';
+      const spriteUrl = getPokeSpriteUrl(pk.speciesId, pk.shiny);
       const fallbackSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg>';
-      const spriteImg = spriteUrl ? ('<img src="' + spriteUrl + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span style="display:none">' + fallbackSvg + '</span>') : fallbackSvg;
+      const spriteImg = spriteUrl ? ('<img src="' + spriteUrl + '" alt="" onerror="if(this.src.includes(\'/shiny/\')){this.src=this.src.replace(\'/shiny/\',\'/\');}else{this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';}"><span style="display:none">' + fallbackSvg + '</span>') : fallbackSvg;
 
       const typesHtml = [pk.type1, pk.type2].filter(Boolean).map(ty => {
         const bg = TIPO_COR[ty.toLowerCase()] || '#6e7681';
@@ -2488,6 +2508,9 @@
       name: 'Giant Cruel',
       level: 600,
       look: 3348,
+      dexId: 73,
+      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png',
+      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png',
       types: ['AGUA', 'VENENO'],
       hp: 4200000,
       atk: 1450,
@@ -2495,15 +2518,15 @@
       interval: 3.0,
       desc: 'Boss de Nv. 600 · 4.2M HP · Daño puro sin tipos',
       drops: [
-        { id: 40575, name: 'AoE TM Disk', cat: 'TMs', chance: '0.08%', rarity: 'legendary', desc: 'Disco que enseña ataque básico en área sin cooldown (drop legendario)' },
-        { id: 40530, name: 'AoE TM Disk Piece', cat: 'Loot', chance: '1.2%', rarity: 'epic', desc: 'Fragmentos para forjar el disco de ataque en área' },
-        { id: 59194, name: 'TM Disk Piece', cat: 'Loot', chance: '4.5%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
-        { id: 70000, name: 'Bronze Boss Token', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
-        { id: 16327, name: 'Shiny Tentacruel Card', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Tentacruel en el Altar para captura' },
-        { id: 3, name: 'Water Stone', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Agua' },
-        { id: 7, name: 'Venom Stone', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Veneno' },
-        { id: 132, name: 'Tentacruel Tentacle', cat: 'Loot', chance: '15.0%', rarity: 'common', desc: 'Tentáculo valioso de Tentacruel' },
-        { id: 59195, name: 'Strange Pheromone', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
+        { id: 40575, name: 'AoE TM Disk', icon: '/assets/items/tm_disk_aoe.png', cat: 'TMs', chance: '0.08%', rarity: 'legendary', desc: 'Disco que enseña ataque básico en área sin cooldown (drop legendario)' },
+        { id: 40530, name: 'AoE TM Disk Piece', icon: '/assets/items/tm_piece_aoe.png', cat: 'Loot', chance: '1.2%', rarity: 'epic', desc: 'Fragmentos para forjar el disco de ataque en área' },
+        { id: 59194, name: 'TM Disk Piece', icon: '/assets/items/tm_disk_piece.png', cat: 'Loot', chance: '4.5%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
+        { id: 70000, name: 'Bronze Boss Token', icon: '/assets/items/bronze_boss_token.png', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
+        { id: 16327, name: 'Shiny Tentacruel Card', icon: '/assets/cards/16327.png', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Tentacruel en el Altar para captura' },
+        { id: 142, name: 'Water Stone', icon: 'water_stone.gif', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Agua' },
+        { id: 139, name: 'Venom Stone', icon: 'venom_stone.gif', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Veneno' },
+        { id: 132, name: 'Tentacruel Tentacle', icon: 'tentacruel_tentacle.png', cat: 'Loot', chance: '15.0%', rarity: 'common', desc: 'Tentáculo valioso de Tentacruel' },
+        { id: 59195, name: 'Strange Pheromone', icon: '/assets/items/rare_pokemon_picture.png', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
       ]
     },
     aerodactyl2: {
@@ -2511,6 +2534,9 @@
       name: 'Ancient Aero',
       level: 500,
       look: 8451,
+      dexId: 142,
+      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png',
+      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png',
       types: ['ROCA', 'VOLADOR'],
       hp: 2300000,
       atk: 1520,
@@ -2518,15 +2544,15 @@
       interval: 2.8,
       desc: 'Boss de Nv. 500 · 2.3M HP · Daño puro sin tipos',
       drops: [
-        { id: 59212, name: 'Rock-Type TM Disk', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Roca' },
-        { id: 59209, name: 'Flying-Type TM Disk', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Volador' },
-        { id: 59194, name: 'TM Disk Piece', cat: 'Loot', chance: '5.0%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
-        { id: 2, name: 'Ancient Stone', cat: 'Piedras', chance: '1.2%', rarity: 'rare', desc: 'Piedra ancestral de evolución (50.000 gold)' },
-        { id: 12, name: 'Rock Stone', cat: 'Piedras', chance: '3.0%', rarity: 'uncommon', desc: 'Piedra evolutiva de elemento Roca' },
-        { id: 70000, name: 'Bronze Boss Token', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
-        { id: 16396, name: 'Shiny Aerodactyl Card', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Aerodactyl en el Altar para captura' },
-        { id: 93, name: 'Old Amber', cat: 'Loot', chance: '2.0%', rarity: 'uncommon', desc: 'Ámbar fósil prehistórico' },
-        { id: 59195, name: 'Strange Pheromone', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
+        { id: 59212, name: 'Rock-Type TM Disk', icon: '/assets/items/tm_disk_elemental.png', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Roca' },
+        { id: 59209, name: 'Flying-Type TM Disk', icon: '/assets/items/tm_disk_elemental.png', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Volador' },
+        { id: 59194, name: 'TM Disk Piece', icon: '/assets/items/tm_disk_piece.png', cat: 'Loot', chance: '5.0%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
+        { id: 2, name: 'Ancient Stone', icon: '/assets/stones/ancient_stone.gif', cat: 'Piedras', chance: '1.2%', rarity: 'rare', desc: 'Piedra ancestral de evolución (50.000 gold)' },
+        { id: 109, name: 'Rock Stone', icon: 'rock_stone.gif', cat: 'Piedras', chance: '3.0%', rarity: 'uncommon', desc: 'Piedra evolutiva de elemento Roca' },
+        { id: 70000, name: 'Bronze Boss Token', icon: '/assets/items/bronze_boss_token.png', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
+        { id: 16396, name: 'Shiny Aerodactyl Card', icon: '/assets/cards/16396.png', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Aerodactyl en el Altar para captura' },
+        { id: 93, name: 'Old Amber', icon: 'old_amber.png', cat: 'Loot', chance: '2.0%', rarity: 'uncommon', desc: 'Ámbar fósil prehistórico' },
+        { id: 59195, name: 'Strange Pheromone', icon: '/assets/items/rare_pokemon_picture.png', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
       ]
     }
   };
@@ -2558,6 +2584,13 @@
   let selectedBossId = 'cruel';
   let selectedBossTab = 'battle'; // 'battle' | 'drops'
   let selectedBossScope = 'all';  // 'all' | '0' | '1' ...
+
+  const getItemIconUrl = (iconPath) => {
+    if (!iconPath) return '';
+    if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) return iconPath;
+    if (iconPath.startsWith('/')) return 'https://poke.idleworld.online' + iconPath;
+    return 'https://poke.idleworld.online/assets/items/' + iconPath;
+  };
 
   const formatSecsToMin = (sec) => {
     const s = Math.round(sec);
@@ -2771,7 +2804,7 @@
         <div class="bs-boss-selector" id="bsBossSelector">
           <div class="bs-boss-card on" data-boss="cruel">
             <div class="bs-boss-avatar">
-              <img src="https://poke.idleworld.online/assets/creatures/3348.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/3348.png';this.onerror=null;" alt="Giant Cruel">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png';this.onerror=null;" alt="Giant Cruel">
             </div>
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
@@ -2784,7 +2817,7 @@
 
           <div class="bs-boss-card" data-boss="aerodactyl2">
             <div class="bs-boss-avatar">
-              <img src="https://poke.idleworld.online/assets/creatures/8451.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/8451.png';this.onerror=null;" alt="Ancient Aero">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png';this.onerror=null;" alt="Ancient Aero">
             </div>
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
@@ -2925,10 +2958,11 @@
 
       boss.drops.forEach(item => {
         const rTheme = RARITY_THEME[item.rarity] || RARITY_THEME.common;
+        const iconUrl = getItemIconUrl(item.icon);
         dropsHtml += `
           <div class="bs-drop-card" style="border-left: 3px solid ${rTheme.color}">
             <div class="bs-drop-icon">
-              <img src="https://poke.idleworld.online/assets/items/${item.id}.png" onerror="this.style.opacity='0.4'" alt="${item.name}">
+              <img src="${iconUrl}" onerror="this.style.opacity='0.3'" alt="${item.name}">
             </div>
             <div class="bs-drop-info">
               <div class="bs-drop-top">
@@ -3139,6 +3173,7 @@
       }
 
       const speciesId = pk.speciesId || pk.id || 0;
+      const pokeSprUrl = getPokeSpriteUrl(speciesId, pk.shiny);
       const typesList = [pk.type1, pk.type2].filter(Boolean).map(t => `<span class="pk-type-tag ${String(t).toLowerCase()}">${t}</span>`).join(' ');
 
       teamHtml += `
@@ -3156,7 +3191,10 @@
 
           <div class="bs-fc-body">
             <div class="bs-fc-avatar">
-              <img src="https://poke.idleworld.online/assets/creatures/${speciesId}.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/${speciesId}.png';this.onerror=null;" alt="${pk.name}">
+              ${pokeSprUrl
+                ? `<img src="${pokeSprUrl}" onerror="if(this.src.includes('/shiny/')){this.src=this.src.replace('/shiny/','/');}else{this.style.opacity='0.4';}" alt="${pk.name}">`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--mut,#8b949e)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg></div>`
+              }
             </div>
             <div class="bs-fc-info">
               <div class="bs-fc-name-row">

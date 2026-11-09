@@ -39,23 +39,34 @@ const fn = new Function('sandbox', moduleCode + '\n' + `
   sandbox.getHeldItemBonus = getHeldItemBonus;
   sandbox.evaluateCandidateVsBoss = evaluateCandidateVsBoss;
   sandbox.simulateTeamBattle = simulateTeamBattle;
+  sandbox.getItemIconUrl = getItemIconUrl;
 `);
 fn(sandbox);
 
-const { BOSSES_CONFIG, CLAN_TYPES_TABLE, getHeldItemBonus, evaluateCandidateVsBoss, simulateTeamBattle } = sandbox;
+const { BOSSES_CONFIG, CLAN_TYPES_TABLE, getHeldItemBonus, evaluateCandidateVsBoss, simulateTeamBattle, getItemIconUrl } = sandbox;
 
-// 2. Verificar configuración de los Bosses activos
+// 2. Verificar configuración de los Bosses activos y sus assets
 assert.ok(BOSSES_CONFIG.cruel, 'Giant Cruel debe existir');
 assert.equal(BOSSES_CONFIG.cruel.level, 600, 'Giant Cruel debe ser nivel 600');
 assert.equal(BOSSES_CONFIG.cruel.hp, 4200000, 'Giant Cruel debe tener 4.2M HP');
+assert.ok(BOSSES_CONFIG.cruel.avatar.startsWith('https://'), 'Giant Cruel debe tener URL de avatar');
 assert.ok(BOSSES_CONFIG.cruel.drops.length >= 8, 'Giant Cruel debe tener al menos 8 drops definidos');
+BOSSES_CONFIG.cruel.drops.forEach(d => {
+  assert.ok(d.icon, `Drop ${d.name} de Giant Cruel debe tener propiedad icon`);
+  assert.ok(getItemIconUrl(d.icon).startsWith('https://'), `Icono de ${d.name} debe resolver a URL válida`);
+});
 
 assert.ok(BOSSES_CONFIG.aerodactyl2, 'Ancient Aero debe existir');
 assert.equal(BOSSES_CONFIG.aerodactyl2.level, 500, 'Ancient Aero debe ser nivel 500');
 assert.equal(BOSSES_CONFIG.aerodactyl2.hp, 2300000, 'Ancient Aero debe tener 2.3M HP');
+assert.ok(BOSSES_CONFIG.aerodactyl2.avatar.startsWith('https://'), 'Ancient Aero debe tener URL de avatar');
 assert.ok(BOSSES_CONFIG.aerodactyl2.drops.length >= 8, 'Ancient Aero debe tener al menos 8 drops definidos');
+BOSSES_CONFIG.aerodactyl2.drops.forEach(d => {
+  assert.ok(d.icon, `Drop ${d.name} de Ancient Aero debe tener propiedad icon`);
+  assert.ok(getItemIconUrl(d.icon).startsWith('https://'), `Icono de ${d.name} debe resolver a URL válida`);
+});
 
-console.log('OK  BOSSES_CONFIG validado (Giant Cruel 4.2M HP, Ancient Aero 2.3M HP)');
+console.log('OK  BOSSES_CONFIG validado (Giant Cruel 4.2M HP, Ancient Aero 2.3M HP, avatares y drops con iconos)');
 
 // 3. Verificar tabla de Clanes
 assert.ok(CLAN_TYPES_TABLE.naturia.includes('GRASS') && CLAN_TYPES_TABLE.naturia.includes('BUG'), 'Naturia debe incluir Grass y Bug');
