@@ -886,6 +886,10 @@
       const pokes = (P.ws.pokes && Array.isArray(P.ws.pokes.list)) ? P.ws.pokes.list : [];
       const ch = (P.api && P.api['/api/characters/me'] && P.api['/api/characters/me'].character) || {};
       const tName = ch.name || '';
+      const catchLog = Array.isArray(P.catchLog) ? P.catchLog : [];
+      const sessCatches = (P.sessCatches && typeof P.sessCatches === 'object') ? P.sessCatches : {};
+      const unassignedLog = catchLog.slice();
+
       const res = [];
       for (const p of pokes) {
         if (!p) continue;
@@ -899,13 +903,38 @@
         const vel = +(s.vel != null ? s.vel : s.speed || 0);
         const parsedStats = (hp > 0 && atk > 0 && def > 0 && spa > 0 && spd > 0 && vel > 0) ? { hp, atk, def, spa, spd, vel } : null;
 
+        const pIdStr = p.id != null ? String(p.id) : '';
+        const pIv = p.ivTotal != null ? Math.round(+p.ivTotal) : null;
+        const pQ = +(+p.quality || 1).toFixed(2);
+
+        let isSessionCatch = !!p._sessCatch || (pIdStr && !!sessCatches[pIdStr]);
+        let catchTime = (pIdStr && sessCatches[pIdStr]) || p._catchTime || 0;
+
+        if (!isSessionCatch && unassignedLog.length > 0) {
+          const matchIdx = unassignedLog.findIndex(c => {
+            if (c.id != null && String(c.id) === pIdStr) return true;
+            if (c.n && (c.n.toLowerCase() === String(p.name || '').toLowerCase() || c.n === '?')) {
+              const cIv = c.iv != null ? Math.round(+c.iv) : null;
+              const cQ = +(+c.q || 1).toFixed(2);
+              if (cIv === pIv && cQ === pQ && !!c.sh === !!p.shiny) return true;
+            }
+            return false;
+          });
+          if (matchIdx !== -1) {
+            const entry = unassignedLog.splice(matchIdx, 1)[0];
+            isSessionCatch = true;
+            catchTime = entry.t || Date.now();
+            if (pIdStr) sessCatches[pIdStr] = catchTime;
+          }
+        }
+
         res.push({
-          id: p.id != null ? String(p.id) : '',
+          id: pIdStr,
           name: p.name || '?',
           level: lv,
           shiny: !!p.shiny,
-          quality: +(+p.quality || 1).toFixed(2),
-          ivTotal: p.ivTotal != null ? Math.round(+p.ivTotal) : null,
+          quality: pQ,
+          ivTotal: pIv,
           power: +p.power || 0,
           team: !!p.team,
           slot: p.slot != null ? p.slot : null,
@@ -914,10 +943,12 @@
           type1: p.type1 ? String(p.type1).toUpperCase() : '',
           type2: p.type2 ? String(p.type2).toUpperCase() : '',
           isDitto: !!p.isDitto,
-          stats: parsedStats
+          stats: parsedStats,
+          isSessionCatch: !!isSessionCatch,
+          catchTime: +catchTime || 0
         });
       }
-      return { ok: true, name: tName, list: res };
+      return { ok: true, name: tName, list: res, catchLogCount: catchLog.length, sessCaptures: (P.sess && P.sess.captures) || 0 };
     } catch (err) {
       return { ok: false, error: String(err) };
     }
@@ -1264,6 +1295,13 @@
 
     // Ordenar
     filtered.sort((a, b) => {
+      if (pokesSortKey === 'catchTime') {
+        const ctA = +a.catchTime || 0;
+        const ctB = +b.catchTime || 0;
+        if (ctA !== ctB) return pokesSortAsc ? ctA - ctB : ctB - ctA;
+        return (b.level || 0) - (a.level || 0);
+      }
+
       if (pokesSortKey === 'trainer') {
         const trA = (a.accIdx != null ? a.accIdx : 99);
         const trB = (b.accIdx != null ? b.accIdx : 99);
@@ -1359,6 +1397,7 @@
                   <span class="pk-poke-name">${pk.name}</span>
                   ${pk.shiny ? '<span class="pk-shiny-badge" title="Shiny">✨</span>' : ''}
                   ${teamBadge}
+                  ${pk.isSessionCatch ? '<span class="pk-team-badge" style="background:rgba(57,135,229,.18);color:#58a6ff;border-color:rgba(57,135,229,.35);font-weight:600" title="' + (pk.catchTime ? 'Capturado en esta sesión (' + new Date(pk.catchTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + ')' : 'Capturado en esta sesión') + '">🎯 Captura' + (pk.catchTime ? ' ' + new Date(pk.catchTime).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '') + '</span>' : ''}
                 </div>
                 <div class="pk-types-row">${typesHtml}</div>
               </div>
