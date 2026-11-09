@@ -7,6 +7,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: https://poke.idleworld.online https://raw.githubusercontent.com; font-src 'self' data:; connect-src https://api.github.com/repos/soufoka/PokeGrid/releases/latest; frame-src https://poke.idleworld.online; child-src https://poke.idleworld.online; base-uri 'none'; form-action 'none'">
 <title>PokeGrid</title>
 <script src="src/domain/iv-math.js"></script>
+<script src="src/custom-ui.js"></script>
 <style>
   /* Cores do app (redesign B): cada uma com um significado so. Neutros; marca e botao principal (vermelho so pra marca,
      principal e erro); estados (ok = ligado/positivo, av = aviso em ambar, nunca o dourado do gold, er = erro) com o tom de
@@ -2828,7 +2829,7 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     if (e.key === 'Escape') sairDoFoco();
     if (e.key === 'F5' || (e.ctrlKey && (e.key === 'r' || e.key === 'R'))) {
       e.preventDefault();
-      refrescarUi();
+      refrescarUi(e && e.shiftKey);
     }
   });
   window.pokeAPI?.onHotkey?.((k) => {
@@ -2850,16 +2851,39 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     topo(refBtn, 'ok', t('refCopied')); // o "Copiado!" tambem no aria-label
     setTimeout(() => soIco(refBtn, 'link', t('refTitle')), 1500);
   };
-  const refrescarUi = () => {
-    webviews.forEach((w, i) => {
-      try {
-        const u = w && w.getURL && w.getURL();
-        if (u && u.startsWith('https://poke.idleworld.online/') && !u.includes('/login')) {
-          sessionStorage.setItem('pg_last_url_' + i, u);
-        }
-      } catch {}
-    });
-    location.reload();
+  const refrescarUi = (forceHardReload) => {
+    if (forceHardReload) {
+      webviews.forEach((w, i) => {
+        try {
+          const u = w && w.getURL && w.getURL();
+          if (u && u.startsWith('https://poke.idleworld.online/') && !u.includes('/login')) {
+            sessionStorage.setItem('pg_last_url_' + i, u);
+          }
+        } catch {}
+      });
+      location.reload();
+      return;
+    }
+    // Recarga en vivo SIN tocar los webviews ni pedir 2FA
+    try {
+      const old = document.getElementById('pgCustomScript');
+      if (old) old.remove();
+      const s = document.createElement('script');
+      s.id = 'pgCustomScript';
+      s.src = 'src/custom-ui.js';
+      s.onload = () => {
+        if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
+        refreshStats();
+      };
+      s.onerror = () => {
+        if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
+        refreshStats();
+      };
+      document.body.appendChild(s);
+    } catch {
+      if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
+      refreshStats();
+    }
   };
   window.addEventListener('beforeunload', () => {
     webviews.forEach((w, i) => {
@@ -2871,7 +2895,7 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
       } catch {}
     });
   });
-  document.getElementById('reloadUi').onclick = () => refrescarUi();
+  document.getElementById('reloadUi').onclick = (e) => refrescarUi(e && e.shiftKey);
   document.getElementById('reloadAll').onclick = () => webviews.forEach((w, i) => { if (!off[i]) { lastLogin[i] = 0; try { w.reloadIgnoringCache(); } catch { w.reload(); } } }); // ignora cache: resolve pagina de login velha em cache (sem captcha)
   document.getElementById('faqBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/FAQ.md');
   document.getElementById('manBtn').onclick = () => window.open('https://github.com/soufoka/PokeGrid-source/blob/main/MANUAL.md');
@@ -4933,6 +4957,10 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
         else s = m + 'm';
         return '<span style="background:rgba(227,179,65,.15);color:var(--gold);border:1px solid rgba(227,179,65,.35);padding:1.5px 7px;border-radius:12px;font-size:11px;font-weight:700" title="' + esc(new Date(t2).toLocaleString()) + '">VIP · ' + s + '</span>';
       };
+
+      if (typeof window.CUSTOM_SB_CONSUMABLES === 'function') {
+        return window.CUSTOM_SB_CONSUMABLES({ cols, t, esc, ico, fmtQty, fmtVip, getQty, nf });
+      }
 
       const inner = cols.length ? '<div style="display:grid;grid-template-columns:repeat(' + Math.min(4, Math.max(1, cols.length)) + ',minmax(0,1fr));gap:12px">' + cols.map(r => {
         const isWait = r.st !== 'on';
