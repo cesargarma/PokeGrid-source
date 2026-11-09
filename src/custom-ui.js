@@ -644,6 +644,625 @@
     @keyframes pkSpin {
       to { transform: rotate(360deg); }
     }
+    /* Modal de Bosses y Simulador de Combate */
+    #bossesOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 850;
+      padding: 16px;
+    }
+    #bossesOverlay.show {
+      display: flex;
+    }
+    #bossesModal {
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 12px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      width: 980px;
+      max-width: 96vw;
+      height: 88vh;
+      max-height: 880px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .bs-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--bd2, #30363d);
+      background: var(--sf2, #1c2128);
+      user-select: none;
+    }
+    .bs-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bs-title h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bs-badge-boss {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid rgba(248, 81, 73, 0.35);
+      color: var(--red, #f85149);
+    }
+    .bs-hd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bs-hd-actions button {
+      background: transparent;
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--mut, #8b949e);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .bs-hd-actions button:hover {
+      background: var(--bd, #21262d);
+      color: var(--tx, #e6edf3);
+      border-color: var(--tx2, #8b949e);
+    }
+    .bs-boss-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px 18px;
+      background: rgba(1, 4, 9, 0.45);
+      border-bottom: 1px solid var(--bd2, #30363d);
+    }
+    .bs-boss-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .bs-boss-card:hover {
+      border-color: var(--mut, #8b949e);
+      background: var(--bd, #21262d);
+    }
+    .bs-boss-card.on {
+      background: rgba(248, 81, 73, 0.12);
+      border-color: var(--red, #f85149);
+      box-shadow: 0 0 10px rgba(248, 81, 73, 0.22);
+    }
+    .bs-boss-avatar {
+      width: 46px;
+      height: 46px;
+      flex: none;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .bs-boss-avatar img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .bs-boss-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .bs-boss-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .bs-boss-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-boss-stat-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(248, 81, 73, 0.15);
+      color: var(--red, #f85149);
+    }
+    .bs-boss-sub {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bs-tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: var(--sf, #161b22);
+      border-bottom: 1px solid var(--bd2, #30363d);
+    }
+    .bs-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--mut, #8b949e);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .bs-tab-btn:hover {
+      background: var(--bd, #21262d);
+      color: var(--tx, #e6edf3);
+    }
+    .bs-tab-btn.on {
+      background: rgba(242, 198, 101, 0.12);
+      border-color: var(--gold, #f2c665);
+      color: var(--gold, #f2c665);
+      font-weight: 700;
+    }
+    .bs-content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .bs-content-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .bs-content-scroll::-webkit-scrollbar-thumb {
+      background: var(--bd2, #30363d);
+      border-radius: 3px;
+    }
+    .bs-scope-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+    }
+    .bs-scope-chips {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .bs-scope-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bd, #21262d);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 999px;
+      color: var(--mut, #8b949e);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.12s ease;
+    }
+    .bs-scope-chip:hover {
+      border-color: var(--mut, #8b949e);
+      color: var(--tx, #e6edf3);
+    }
+    .bs-scope-chip.on {
+      background: rgba(88, 166, 255, 0.15);
+      border-color: var(--blu, #58a6ff);
+      color: var(--blu, #58a6ff);
+      font-weight: 700;
+    }
+    .bs-scope-tip {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .bs-outcome-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid;
+    }
+    .bs-outcome-banner.solo {
+      background: linear-gradient(90deg, rgba(242, 198, 101, 0.15), rgba(63, 185, 80, 0.08));
+      border-color: var(--gold, #f2c665);
+    }
+    .bs-outcome-banner.win {
+      background: linear-gradient(90deg, rgba(63, 185, 80, 0.15), rgba(88, 166, 255, 0.08));
+      border-color: var(--grn, #3fb950);
+    }
+    .bs-outcome-banner.defeat {
+      background: linear-gradient(90deg, rgba(248, 81, 73, 0.15), rgba(240, 136, 62, 0.08));
+      border-color: var(--red, #f85149);
+    }
+    .bs-outcome-ico {
+      font-size: 24px;
+      flex: none;
+      line-height: 1;
+    }
+    .bs-outcome-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .bs-outcome-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bs-outcome-sub {
+      font-size: 11.5px;
+      color: var(--tx2, #c9d1d9);
+      line-height: 1.4;
+    }
+    .bs-hp-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+    }
+    .bs-hp-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-hp-track {
+      height: 18px;
+      background: #21262d;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .bs-hp-seg {
+      height: 100%;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+    .bs-hp-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding-top: 4px;
+    }
+    .bs-hp-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+    }
+    .bs-hp-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex: none;
+    }
+    .bs-team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 12px;
+    }
+    .bs-fighter-card {
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.15s ease;
+    }
+    .bs-fighter-card.solo-winner {
+      border-color: var(--gold, #f2c665);
+      box-shadow: 0 0 10px rgba(242, 198, 101, 0.2);
+    }
+    .bs-fc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .bs-slot-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 4px;
+      background: var(--bd, #21262d);
+      color: var(--mut, #8b949e);
+    }
+    .bs-fc-trainer {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tx2, #c9d1d9);
+    }
+    .bs-fc-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .bs-fc-status.survived {
+      background: rgba(63, 185, 80, 0.15);
+      color: var(--grn, #3fb950);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+    }
+    .bs-fc-status.fainted {
+      background: rgba(248, 81, 73, 0.12);
+      color: var(--red, #f85149);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+    }
+    .bs-fc-status.reserve {
+      background: rgba(139, 148, 158, 0.12);
+      color: var(--mut, #8b949e);
+      border: 1px solid rgba(139, 148, 158, 0.3);
+    }
+    .bs-fc-body {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bs-fc-avatar {
+      width: 44px;
+      height: 44px;
+      flex: none;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .bs-fc-avatar img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .bs-fc-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bs-fc-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-fc-sub {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bs-fc-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .bs-badge-clan {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(126, 231, 135, 0.12);
+      border: 1px solid rgba(126, 231, 135, 0.35);
+      color: #7ee787;
+    }
+    .bs-badge-held {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(210, 168, 255, 0.12);
+      border: 1px solid rgba(210, 168, 255, 0.35);
+      color: #d2a8ff;
+    }
+    .bs-fc-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: 6px;
+      font-size: 11px;
+    }
+    .bs-fc-metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .bs-fc-metric-lbl {
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+    }
+    .bs-fc-metric-val {
+      color: var(--tx, #e6edf3);
+      font-weight: 600;
+      font-size: 11.5px;
+    }
+    .bs-drops-head {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 14px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+    }
+    .bs-drops-head h3 {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-drops-head p {
+      font-size: 11.5px;
+      color: var(--mut, #8b949e);
+      margin: 0;
+    }
+    .bs-drops-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+    .bs-drop-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: var(--sf2, #1c2128);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+    .bs-drop-card:hover {
+      border-color: var(--mut, #8b949e);
+      background: var(--bd, #21262d);
+    }
+    .bs-drop-icon {
+      width: 42px;
+      height: 42px;
+      flex: none;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--bd2, #30363d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .bs-drop-icon img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+    .bs-drop-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bs-drop-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .bs-drop-name {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bs-drop-chance {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(242, 198, 101, 0.15);
+      color: var(--gold, #f2c665);
+      border: 1px solid rgba(242, 198, 101, 0.3);
+    }
+    .bs-drop-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bs-drop-rarity {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid;
+    }
+    .bs-drop-cat {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+    }
+    .bs-drop-desc {
+      font-size: 11px;
+      color: var(--mut, #8b949e);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   `);
 
   // Card Consumibles (Pokéballs, Potions, Divisas)
@@ -955,6 +1574,8 @@
       const pokes = (P.ws.pokes && Array.isArray(P.ws.pokes.list)) ? P.ws.pokes.list : [];
       const ch = (P.api && P.api['/api/characters/me'] && P.api['/api/characters/me'].character) || {};
       const tName = ch.name || '';
+      const tClan = ch.clan || ch.clanName || (ch.guild && ch.guild.name) || (P.ws && P.ws.clan && P.ws.clan.name) || null;
+      const tClanRank = ch.clanRank != null ? ch.clanRank : (ch.clan_rank != null ? ch.clan_rank : 0);
       const catchLog = Array.isArray(P.catchLog) ? P.catchLog : [];
       const sessCatches = (P.sessCatches && typeof P.sessCatches === 'object') ? P.sessCatches : {};
       const unassignedLog = catchLog.slice();
@@ -974,6 +1595,15 @@
 
         const pIdStr = p.id != null ? String(p.id) : '';
         const pIv = p.ivTotal != null ? Math.round(+p.ivTotal) : null;
+        const heldRaw = p.heldItem || p.held || p.item || p.held_item || (p.equipped && p.equipped.item) || null;
+        let heldItem = '';
+        if (heldRaw) {
+          if (typeof heldRaw === 'object') {
+            heldItem = heldRaw.name || heldRaw.item || heldRaw.title || heldRaw.key || String(heldRaw.id || '');
+          } else {
+            heldItem = String(heldRaw);
+          }
+        }
         const pQ = +(+p.quality || 1).toFixed(2);
 
         let isSessionCatch = !!p._sessCatch || (pIdStr && !!sessCatches[pIdStr]);
@@ -1013,11 +1643,12 @@
           type2: p.type2 ? String(p.type2).toUpperCase() : '',
           isDitto: !!p.isDitto,
           stats: parsedStats,
+          heldItem: heldItem,
           isSessionCatch: !!isSessionCatch,
           catchTime: +catchTime || 0
         });
       }
-      return { ok: true, name: tName, list: res, catchLogCount: catchLog.length, sessCaptures: (P.sess && P.sess.captures) || 0 };
+      return { ok: true, name: tName, clan: tClan, clanRank: tClanRank, list: res, catchLogCount: catchLog.length, sessCaptures: (P.sess && P.sess.captures) || 0 };
     } catch (err) {
       return { ok: false, error: String(err) };
     }
@@ -1301,7 +1932,9 @@
       try {
         const res = await wv.executeJavaScript(POKES_LV300_QUERY);
         const trainerName = (res && res.name) || fallbackName;
-        activeTrainers.push({ idx, name: trainerName, dot });
+        const trainerClan = (res && res.clan) || null;
+        const trainerClanRank = (res && res.clanRank) || 0;
+        activeTrainers.push({ idx, name: trainerName, dot, clan: trainerClan, clanRank: trainerClanRank });
 
         if (res && res.ok && Array.isArray(res.list)) {
           res.list.forEach(pk => {
@@ -1309,6 +1942,8 @@
               accIdx: idx,
               trainerName,
               dotColor: dot,
+              clan: trainerClan,
+              clanRank: trainerClanRank,
               ...pk
             });
           });
@@ -1360,6 +1995,12 @@
     window.updateTrainerChips();
     window.updatePresetPills();
     window.renderPokesTable();
+
+    // Si el modal de bosses está abierto, actualizarlo también
+    const bsOv = document.getElementById('bossesOverlay');
+    if (bsOv && bsOv.classList.contains('show') && typeof window.renderBossesModal === 'function') {
+      window.renderBossesModal();
+    }
   };
 
   // Actualizar chips de entrenadores
@@ -1837,6 +2478,808 @@
     }
   };
 
+  // =========================================================================
+  // MODAL DE BOSSES Y SIMULADOR DE COMBATE EN TIEMPO REAL
+  // =========================================================================
+
+  const BOSSES_CONFIG = {
+    cruel: {
+      id: 'cruel',
+      name: 'Giant Cruel',
+      level: 600,
+      look: 3348,
+      types: ['AGUA', 'VENENO'],
+      hp: 4200000,
+      atk: 1450,
+      def: 1380,
+      interval: 3.0,
+      desc: 'Boss de Nv. 600 · 4.2M HP · Daño puro sin tipos',
+      drops: [
+        { id: 40575, name: 'AoE TM Disk', cat: 'TMs', chance: '0.08%', rarity: 'legendary', desc: 'Disco que enseña ataque básico en área sin cooldown (drop legendario)' },
+        { id: 40530, name: 'AoE TM Disk Piece', cat: 'Loot', chance: '1.2%', rarity: 'epic', desc: 'Fragmentos para forjar el disco de ataque en área' },
+        { id: 59194, name: 'TM Disk Piece', cat: 'Loot', chance: '4.5%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
+        { id: 70000, name: 'Bronze Boss Token', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
+        { id: 16327, name: 'Shiny Tentacruel Card', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Tentacruel en el Altar para captura' },
+        { id: 3, name: 'Water Stone', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Agua' },
+        { id: 7, name: 'Venom Stone', cat: 'Piedras', chance: '2.5%', rarity: 'common', desc: 'Piedra evolutiva de elemento Veneno' },
+        { id: 132, name: 'Tentacruel Tentacle', cat: 'Loot', chance: '15.0%', rarity: 'common', desc: 'Tentáculo valioso de Tentacruel' },
+        { id: 59195, name: 'Strange Pheromone', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
+      ]
+    },
+    aerodactyl2: {
+      id: 'aerodactyl2',
+      name: 'Ancient Aero',
+      level: 500,
+      look: 8451,
+      types: ['ROCA', 'VOLADOR'],
+      hp: 2300000,
+      atk: 1520,
+      def: 1150,
+      interval: 2.8,
+      desc: 'Boss de Nv. 500 · 2.3M HP · Daño puro sin tipos',
+      drops: [
+        { id: 59212, name: 'Rock-Type TM Disk', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Roca' },
+        { id: 59209, name: 'Flying-Type TM Disk', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Volador' },
+        { id: 59194, name: 'TM Disk Piece', cat: 'Loot', chance: '5.0%', rarity: 'rare', desc: 'Fragmentos de disco elemental de ataques' },
+        { id: 2, name: 'Ancient Stone', cat: 'Piedras', chance: '1.2%', rarity: 'rare', desc: 'Piedra ancestral de evolución (50.000 gold)' },
+        { id: 12, name: 'Rock Stone', cat: 'Piedras', chance: '3.0%', rarity: 'uncommon', desc: 'Piedra evolutiva de elemento Roca' },
+        { id: 70000, name: 'Bronze Boss Token', cat: 'Loot', chance: '8.0%', rarity: 'uncommon', desc: 'Medalla de jefe (250.000 gold de venta directa a NPC)' },
+        { id: 16396, name: 'Shiny Aerodactyl Card', cat: 'Cartas', chance: '0.02%', rarity: 'mythic', desc: 'Invoca a Shiny Aerodactyl en el Altar para captura' },
+        { id: 93, name: 'Old Amber', cat: 'Loot', chance: '2.0%', rarity: 'uncommon', desc: 'Ámbar fósil prehistórico' },
+        { id: 59195, name: 'Strange Pheromone', cat: 'Loot', chance: '0.1%', rarity: 'rare', desc: 'Objeto valioso (1.000.000 gold en tienda)' }
+      ]
+    }
+  };
+
+  const CLAN_TYPES_TABLE = {
+    naturia: ['GRASS', 'BUG'],
+    volcanic: ['FIRE'],
+    seavell: ['WATER', 'ICE'],
+    raibolt: ['ELECTRIC'],
+    orebound: ['ROCK'],
+    ironhard: ['STEEL', 'GROUND'],
+    psycraft: ['PSYCHIC', 'FAIRY'],
+    gardestrike: ['FIGHTING', 'NORMAL'],
+    wingeon: ['FLYING', 'DRAGON'],
+    malefic: ['GHOST', 'DARK', 'POISON']
+  };
+
+  const RARITY_THEME = {
+    legendary: { color: '#f2c665', bg: 'rgba(242, 198, 101, 0.12)', border: 'rgba(242, 198, 101, 0.40)', label: 'Legendario' },
+    mythic:    { color: '#bc8cff', bg: 'rgba(188, 140, 255, 0.12)', border: 'rgba(188, 140, 255, 0.40)', label: 'Mítico' },
+    epic:      { color: '#d2a8ff', bg: 'rgba(210, 168, 255, 0.12)', border: 'rgba(210, 168, 255, 0.40)', label: 'Épico' },
+    rare:      { color: '#58a6ff', bg: 'rgba(88, 166, 255, 0.12)',  border: 'rgba(88, 166, 255, 0.40)',  label: 'Raro' },
+    uncommon:  { color: '#3fb950', bg: 'rgba(63, 185, 80, 0.12)',   border: 'rgba(63, 185, 80, 0.40)',   label: 'Poco común' },
+    common:    { color: '#8b949e', bg: 'rgba(139, 148, 158, 0.10)', border: 'rgba(139, 148, 158, 0.30)', label: 'Común' }
+  };
+
+  const BOSS_SEG_COLORS = ['#f2c665', '#58a6ff', '#3fb950', '#bc8cff', '#f0883e', '#39c5cf'];
+
+  let selectedBossId = 'cruel';
+  let selectedBossTab = 'battle'; // 'battle' | 'drops'
+  let selectedBossScope = 'all';  // 'all' | '0' | '1' ...
+
+  const formatSecsToMin = (sec) => {
+    const s = Math.round(sec);
+    if (s < 60) return s + ' s';
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return rem > 0 ? (m + ' min ' + rem + ' s') : (m + ' min');
+  };
+
+  function getHeldItemBonus(heldStr) {
+    if (!heldStr) return { hp: 1.0, atk: 1.0, def: 1.0, label: null };
+    const h = String(heldStr).toLowerCase();
+    if (h.includes('vitality') || h.includes('vida')) return { hp: 1.15, atk: 1.0, def: 1.0, label: 'X-Vitality (+15% HP)' };
+    if (h.includes('attack') || h.includes('ataque')) return { hp: 1.0, atk: 1.15, def: 1.0, label: 'X-Attack (+15% ATK)' };
+    if (h.includes('defense') || h.includes('defesa')) return { hp: 1.0, atk: 1.0, def: 1.15, label: 'X-Defense (+15% DEF)' };
+    if (h.includes('boost') || h.includes('misto')) return { hp: 1.0, atk: 1.10, def: 1.10, label: 'X-Boost (+10% ATK/DEF)' };
+    if (h.includes('exp') || h.includes('experience')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Exp (+Exp)' };
+    if (h.includes('lucky') || h.includes('sorte')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Lucky (+Loot)' };
+    return { hp: 1.0, atk: 1.0, def: 1.0, label: heldStr };
+  }
+
+  function evaluateCandidateVsBoss(pk, boss, clanSlug) {
+    const types = [pk.type1, pk.type2].filter(Boolean).map(t => String(t).toUpperCase());
+    let clanMult = 1.0;
+    let clanName = null;
+    if (clanSlug) {
+      const cKey = String(clanSlug).toLowerCase().trim();
+      const cTypes = CLAN_TYPES_TABLE[cKey] || [];
+      if (types.some(t => cTypes.includes(t))) {
+        clanMult = 1.15;
+        clanName = clanSlug.charAt(0).toUpperCase() + clanSlug.slice(1);
+      }
+    }
+
+    const heldInfo = getHeldItemBonus(pk.heldItem || pk.held || '');
+
+    const s = pk.stats || {};
+    const baseHp = +(s.hp || pk.hp || (pk.level * 4.5));
+    const baseAtk = Math.max(+(s.atk || 0), +(s.spa || 0), +(pk.power || 0) * 0.15 || 100);
+    const baseDef = Math.max(50, ((+(s.def || 0) || 100) + (+(s.spd || 0) || 100)) / 2);
+
+    const effectiveHp = Math.round(baseHp * heldInfo.hp * (clanMult > 1 ? 1.05 : 1.0));
+    const effectiveAtk = Math.round(baseAtk * heldInfo.atk * clanMult);
+    const effectiveDef = Math.round(baseDef * heldInfo.def * (clanMult > 1 ? 1.05 : 1.0));
+
+    const bossDmgPerHit = Math.max(15, Math.round((boss.atk / Math.max(10, effectiveDef)) * 340));
+    const hitsSurviving = Math.max(1, Math.floor(effectiveHp / bossDmgPerHit));
+    const survivalSecs = hitsSurviving * (boss.interval || 3.0);
+
+    const qMult = +pk.quality > 0 ? +pk.quality : 1.0;
+    const power = +pk.power > 0 ? +pk.power : (effectiveAtk * 8);
+    const pokeDmgPerHit = Math.max(10, Math.round((effectiveAtk / Math.max(10, boss.def)) * power * 0.22 * qMult));
+    const hitsDealt = Math.max(1, Math.floor(survivalSecs / 1.35));
+    const totalDmgDealt = hitsDealt * pokeDmgPerHit;
+    const pctOfBoss = +((totalDmgDealt / boss.hp) * 100).toFixed(1);
+
+    return {
+      pokemon: pk,
+      effectiveHp,
+      effectiveAtk,
+      effectiveDef,
+      clanMult,
+      clanName,
+      heldInfo,
+      bossDmgPerHit,
+      hitsSurviving,
+      survivalSecs,
+      pokeDmgPerHit,
+      hitsDealt,
+      totalDmgDealt,
+      pctOfBoss
+    };
+  }
+
+  function simulateTeamBattle(team, boss, defaultClan) {
+    let currentTime = 0;
+    let remainingBossHp = boss.hp;
+    const battleLog = [];
+    let victory = false;
+
+    for (let i = 0; i < team.length; i++) {
+      const pk = team[i];
+      const clanToUse = pk.clan || defaultClan || null;
+      const evalRes = evaluateCandidateVsBoss(pk, boss, clanToUse);
+      const enteredAt = currentTime;
+
+      let pkHp = evalRes.effectiveHp;
+      let pokeDmgDone = 0;
+      let pokeHits = 0;
+      let bossHits = 0;
+      let faintedAt = null;
+
+      const pokeInterval = 1.35;
+      const bossInterval = boss.interval || 3.0;
+      let nextPokeHit = currentTime + pokeInterval;
+      let nextBossHit = currentTime + bossInterval;
+
+      while (pkHp > 0 && remainingBossHp > 0) {
+        if (nextPokeHit <= nextBossHit) {
+          currentTime = nextPokeHit;
+          const dmg = evalRes.pokeDmgPerHit;
+          pokeDmgDone += dmg;
+          remainingBossHp -= dmg;
+          pokeHits++;
+          nextPokeHit += pokeInterval;
+          if (remainingBossHp <= 0) {
+            remainingBossHp = 0;
+            victory = true;
+            break;
+          }
+        } else {
+          currentTime = nextBossHit;
+          const bDmg = evalRes.bossDmgPerHit;
+          pkHp -= bDmg;
+          bossHits++;
+          nextBossHit += bossInterval;
+          if (pkHp <= 0) {
+            pkHp = 0;
+            faintedAt = currentTime;
+            break;
+          }
+        }
+      }
+
+      const pctOfBoss = +((pokeDmgDone / boss.hp) * 100).toFixed(1);
+      battleLog.push({
+        slot: i + 1,
+        pokemon: pk,
+        enteredAt,
+        faintedAt,
+        survived: pkHp > 0,
+        pokeDmgDone,
+        pctOfBoss,
+        pokeDmgPerHit: evalRes.pokeDmgPerHit,
+        bossDmgPerHit: evalRes.bossDmgPerHit,
+        hitsSurviving: bossHits,
+        effectiveHp: evalRes.effectiveHp,
+        clanBonus: evalRes.clanMult > 1,
+        clanName: evalRes.clanName,
+        heldLabel: evalRes.heldInfo.label
+      });
+
+      if (victory) break;
+    }
+
+    for (let j = battleLog.length; j < team.length; j++) {
+      const pk = team[j];
+      const clanToUse = pk.clan || defaultClan || null;
+      const evalRes = evaluateCandidateVsBoss(pk, boss, clanToUse);
+      battleLog.push({
+        slot: j + 1,
+        pokemon: pk,
+        enteredAt: null,
+        faintedAt: null,
+        survived: true,
+        didNotEnter: true,
+        pokeDmgDone: 0,
+        pctOfBoss: 0,
+        pokeDmgPerHit: evalRes.pokeDmgPerHit,
+        bossDmgPerHit: evalRes.bossDmgPerHit,
+        hitsSurviving: 0,
+        effectiveHp: evalRes.effectiveHp,
+        clanBonus: evalRes.clanMult > 1,
+        clanName: evalRes.clanName,
+        heldLabel: evalRes.heldInfo.label
+      });
+    }
+
+    const activeMembers = battleLog.filter(m => !m.didNotEnter);
+    const soloKill = victory && activeMembers.length === 1;
+
+    return {
+      victory,
+      soloKill,
+      totalTime: currentTime,
+      bossMaxHp: boss.hp,
+      remainingBossHp,
+      bossHpPctRemaining: +((remainingBossHp / boss.hp) * 100).toFixed(1),
+      bossHpPctDepleted: +(((boss.hp - remainingBossHp) / boss.hp) * 100).toFixed(1),
+      members: battleLog
+    };
+  }
+
+  window.initBossesModal = function() {
+    let ov = document.getElementById('bossesOverlay');
+    if (ov && ov.querySelector('#bsTabsBar')) return ov;
+    const wasOpen = ov && ov.classList.contains('show');
+    if (ov) ov.remove();
+
+    ov = document.createElement('div');
+    ov.id = 'bossesOverlay';
+    if (wasOpen) ov.classList.add('show');
+    ov.innerHTML = `
+      <div id="bossesModal">
+        <div class="bs-hd">
+          <div class="bs-title">
+            <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--red,#f85149)">
+              <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+              <path d="M13 19l6 2 2-6-4-4-4 8z"/>
+              <path d="M16 16l4 4"/>
+              <path d="M19 21l2-2"/>
+            </svg>
+            <h2>Bosses & Simulador <span class="bs-badge-boss" id="bsBossBadge">Giant Cruel</span></h2>
+          </div>
+          <div class="bs-hd-actions">
+            <button id="bsRefreshBtn" title="Re-analizar Pokémon de todas las cuentas">↻ Re-analizar</button>
+            <button id="bsCloseBtn" class="pk-close-btn" title="Cerrar (Esc)">✕</button>
+          </div>
+        </div>
+
+        <div class="bs-boss-selector" id="bsBossSelector">
+          <div class="bs-boss-card on" data-boss="cruel">
+            <div class="bs-boss-avatar">
+              <img src="https://poke.idleworld.online/assets/creatures/3348.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/3348.png';this.onerror=null;" alt="Giant Cruel">
+            </div>
+            <div class="bs-boss-info">
+              <div class="bs-boss-name-row">
+                <span class="bs-boss-name">Giant Cruel</span>
+                <span class="bs-boss-stat-tag">Nv. 600 · 4.2M HP</span>
+              </div>
+              <span class="bs-boss-sub">ATK: 1.450 · DEF: 1.380 · Cadencia: 3.0s · Daño puro</span>
+            </div>
+          </div>
+
+          <div class="bs-boss-card" data-boss="aerodactyl2">
+            <div class="bs-boss-avatar">
+              <img src="https://poke.idleworld.online/assets/creatures/8451.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/8451.png';this.onerror=null;" alt="Ancient Aero">
+            </div>
+            <div class="bs-boss-info">
+              <div class="bs-boss-name-row">
+                <span class="bs-boss-name">Ancient Aero</span>
+                <span class="bs-boss-stat-tag">Nv. 500 · 2.3M HP</span>
+              </div>
+              <span class="bs-boss-sub">ATK: 1.520 · DEF: 1.150 · Cadencia: 2.8s · Daño puro</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bs-tabs-bar" id="bsTabsBar">
+          <button class="bs-tab-btn on" data-tab="battle">⚔️ Simulación y Equipo Óptimo</button>
+          <button class="bs-tab-btn" data-tab="drops">🎁 Posibles Drops (% de caída)</button>
+        </div>
+
+        <div class="bs-content-scroll" id="bsBodyContent">
+          <!-- Dynamic Content rendered by window.renderBossesModal() -->
+        </div>
+
+        <div id="bsLoading" class="pk-state-msg" style="display:none;padding:40px;flex-direction:column;align-items:center;gap:12px">
+          <span class="pk-spinner"></span>
+          <span style="font-size:12px;color:var(--mut)">Analizando Pokémon de todas las cuentas...</span>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+
+    const closeBtn = ov.querySelector('#bsCloseBtn');
+    if (closeBtn) closeBtn.onclick = () => window.closeBossesModal();
+
+    const refreshBtn = ov.querySelector('#bsRefreshBtn');
+    if (refreshBtn) {
+      refreshBtn.onclick = () => {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = 'Analizando…';
+        window.fetchPokes300(true).finally(() => {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = '↻ Re-analizar';
+          window.renderBossesModal();
+        });
+      };
+    }
+
+    ov.onclick = (e) => {
+      if (e.target === ov) window.closeBossesModal();
+    };
+
+    // Boss selector click
+    const bossCards = ov.querySelectorAll('.bs-boss-card');
+    bossCards.forEach(card => {
+      card.onclick = () => {
+        const bId = card.getAttribute('data-boss');
+        if (bId && BOSSES_CONFIG[bId]) {
+          selectedBossId = bId;
+          window.renderBossesModal();
+        }
+      };
+    });
+
+    // Tab buttons click
+    const tabBtns = ov.querySelectorAll('.bs-tab-btn');
+    tabBtns.forEach(btn => {
+      btn.onclick = () => {
+        const t = btn.getAttribute('data-tab');
+        if (t) {
+          selectedBossTab = t;
+          window.renderBossesModal();
+        }
+      };
+    });
+
+    return ov;
+  };
+
+  window.openBossesModal = function() {
+    const ov = window.initBossesModal();
+    ov.classList.add('show');
+    const btn = document.getElementById('bossesBtn');
+    if (btn) btn.classList.add('on');
+
+    if (!window.__pokes300Data || window.__pokes300Data.length === 0) {
+      const loading = ov.querySelector('#bsLoading');
+      const bodyContent = ov.querySelector('#bsBodyContent');
+      if (loading) loading.style.display = 'flex';
+      if (bodyContent) bodyContent.style.display = 'none';
+
+      window.fetchPokes300(false).finally(() => {
+        if (loading) loading.style.display = 'none';
+        if (bodyContent) bodyContent.style.display = 'flex';
+        window.renderBossesModal();
+      });
+    } else {
+      window.renderBossesModal();
+    }
+  };
+
+  window.closeBossesModal = function() {
+    const ov = document.getElementById('bossesOverlay');
+    if (ov) ov.classList.remove('show');
+    const btn = document.getElementById('bossesBtn');
+    if (btn) btn.classList.remove('on');
+  };
+
+  window.renderBossesModal = function() {
+    const ov = document.getElementById('bossesOverlay');
+    if (!ov) return;
+
+    const boss = BOSSES_CONFIG[selectedBossId] || BOSSES_CONFIG.cruel;
+
+    // Header badge
+    const badge = ov.querySelector('#bsBossBadge');
+    if (badge) badge.textContent = boss.name + ' (Nv. ' + boss.level + ')';
+
+    // Boss selector active state
+    ov.querySelectorAll('.bs-boss-card').forEach(c => {
+      c.classList.toggle('on', c.getAttribute('data-boss') === boss.id);
+    });
+
+    // Tab buttons active state
+    ov.querySelectorAll('.bs-tab-btn').forEach(b => {
+      b.classList.toggle('on', b.getAttribute('data-tab') === selectedBossTab);
+    });
+
+    const bodyContent = ov.querySelector('#bsBodyContent');
+    if (!bodyContent) return;
+
+    if (selectedBossTab === 'drops') {
+      // TAB DE DROPS
+      let dropsHtml = `
+        <div class="bs-drops-head">
+          <h3>Botín y Recompensas de ${boss.name}</h3>
+          <p>Tabla oficial de posibles recompensas al derrotar al jefe. Los porcentajes corresponden a la probabilidad de obtención por victoria.</p>
+        </div>
+        <div class="bs-drops-grid">
+      `;
+
+      boss.drops.forEach(item => {
+        const rTheme = RARITY_THEME[item.rarity] || RARITY_THEME.common;
+        dropsHtml += `
+          <div class="bs-drop-card" style="border-left: 3px solid ${rTheme.color}">
+            <div class="bs-drop-icon">
+              <img src="https://poke.idleworld.online/assets/items/${item.id}.png" onerror="this.style.opacity='0.4'" alt="${item.name}">
+            </div>
+            <div class="bs-drop-info">
+              <div class="bs-drop-top">
+                <span class="bs-drop-name" style="color:${rTheme.color}" title="${item.name}">${item.name}</span>
+                <span class="bs-drop-chance">${item.chance}</span>
+              </div>
+              <div class="bs-drop-meta">
+                <span class="bs-drop-rarity" style="color:${rTheme.color};background:${rTheme.bg};border-color:${rTheme.border}">${rTheme.label}</span>
+                <span class="bs-drop-cat">${item.cat}</span>
+              </div>
+              <span class="bs-drop-desc" title="${item.desc}">${item.desc}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      dropsHtml += `</div>`;
+      bodyContent.innerHTML = dropsHtml;
+      return;
+    }
+
+    // TAB DE COMBATE Y EQUIPO ÓPTIMO
+    const trainers = window.__pokesTrainers || [];
+    let scopeHtml = `
+      <div class="bs-scope-bar">
+        <div class="bs-scope-chips" id="bsScopeChips">
+          <span style="font-size:11.5px;font-weight:600;color:var(--mut);user-select:none;margin-right:2px">Alcance:</span>
+          <button class="bs-scope-chip${selectedBossScope === 'all' ? ' on' : ''}" data-scope="all">🌐 Todas las cuentas (Global)</button>
+    `;
+
+    trainers.forEach(tr => {
+      const clanText = tr.clan ? (' [' + tr.clan.charAt(0).toUpperCase() + tr.clan.slice(1) + ']') : '';
+      scopeHtml += `
+        <button class="bs-scope-chip${selectedBossScope === String(tr.idx) ? ' on' : ''}" data-scope="${tr.idx}">
+          <span style="width:7px;height:7px;border-radius:50%;background:${tr.dot};display:inline-block"></span>
+          ${tr.name}${clanText}
+        </button>
+      `;
+    });
+
+    scopeHtml += `
+        </div>
+        <div class="bs-scope-tip">
+          <span>💡 Boss sin tipos elementales · Se aplican bonos de Clan (+15% ATK) y Held Items (+15%)</span>
+        </div>
+      </div>
+    `;
+
+    // Filtrar candidatos
+    const allPokes = window.__pokes300Data || [];
+    let candidates = allPokes.slice();
+
+    if (selectedBossScope !== 'all') {
+      const accNum = +selectedBossScope;
+      candidates = candidates.filter(p => p.accIdx === accNum);
+    }
+
+    // Filtrar por nivel >= 300 (si no hay ninguno, tomar los mejores disponibles)
+    const lv300Pokes = candidates.filter(p => +p.level >= 300);
+    const pool = lv300Pokes.length > 0 ? lv300Pokes : candidates;
+
+    if (pool.length === 0) {
+      bodyContent.innerHTML = scopeHtml + `
+        <div class="pk-state-msg" style="padding:40px;display:flex;flex-direction:column;gap:8px">
+          <span>No se encontraron Pokémon disponibles para simular el combate.</span>
+          <span style="font-size:11.5px;color:var(--mut)">Asegúrate de que las cuentas tengan Pokémon cargados o pulsa "Re-analizar".</span>
+        </div>
+      `;
+      window.bindBossScopeEvents(ov);
+      return;
+    }
+
+    // Evaluar y ordenar por daño total
+    pool.forEach(pk => {
+      const clanToUse = pk.clan || (trainers[pk.accIdx] && trainers[pk.accIdx].clan) || null;
+      pk.__bossEval = evaluateCandidateVsBoss(pk, boss, clanToUse);
+    });
+
+    pool.sort((a, b) => (b.__bossEval.totalDmgDealt - a.__bossEval.totalDmgDealt) || (b.level - a.level));
+
+    // Tomar los 6 mejores
+    const top6 = pool.slice(0, 6);
+    const battleResult = simulateTeamBattle(top6, boss, null);
+
+    // Renderizar Banner de Resultado
+    let outcomeHtml = '';
+    const activeFighters = battleResult.members.filter(m => !m.didNotEnter);
+    const totalTimeText = formatSecsToMin(battleResult.totalTime);
+
+    if (battleResult.soloKill) {
+      const soloFighter = battleResult.members[0];
+      outcomeHtml = `
+        <div class="bs-outcome-banner solo">
+          <div class="bs-outcome-ico">🏆</div>
+          <div class="bs-outcome-body">
+            <div class="bs-outcome-title">
+              ¡VICTORIA ASEGURADA (SOLO-KILL CONFIRMADO)!
+              <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(242,198,101,0.2);color:var(--gold,#f2c665)">1 Pokémon necesario</span>
+            </div>
+            <div class="bs-outcome-sub">
+              <strong>${soloFighter.pokemon.name}</strong> (Nv. ${soloFighter.pokemon.level}) es capaz de derrotar por sí solo a <strong>${boss.name}</strong> en <strong>${totalTimeText}</strong> sin necesidad de relevos.
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (battleResult.victory) {
+      outcomeHtml = `
+        <div class="bs-outcome-banner win">
+          <div class="bs-outcome-ico">⚔️</div>
+          <div class="bs-outcome-body">
+            <div class="bs-outcome-title">
+              ¡VICTORIA ASEGURADA CON EL EQUIPO!
+              <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(63,185,80,0.2);color:var(--grn,#3fb950)">${activeFighters.length} de 6 Pokémon usados</span>
+            </div>
+            <div class="bs-outcome-sub">
+              El equipo óptimo derrota a <strong>${boss.name}</strong> en <strong>${totalTimeText}</strong>. ${6 - activeFighters.length} Pokémon quedan de reserva ilesos.
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      outcomeHtml = `
+        <div class="bs-outcome-banner defeat">
+          <div class="bs-outcome-ico">⚠️</div>
+          <div class="bs-outcome-body">
+            <div class="bs-outcome-title">
+              DAÑO INSUFICIENTE (DERROTA)
+              <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(248,81,73,0.2);color:var(--red,#f85149)">${battleResult.bossHpPctDepleted}% de daño causado</span>
+            </div>
+            <div class="bs-outcome-sub">
+              El equipo agota sus 6 Pokémon tras <strong>${totalTimeText}</strong> de combate. Logra reducir <strong>${(boss.hp - battleResult.remainingBossHp).toLocaleString()} HP</strong>, pero restan <strong>${battleResult.remainingBossHp.toLocaleString()} HP (${battleResult.bossHpPctRemaining}%)</strong> para vencer a ${boss.name}.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Renderizar Barra de Vida Segmentada
+    let hpBarSegs = '';
+    let hpLegendItems = '';
+
+    battleResult.members.forEach((m, idx) => {
+      if (m.didNotEnter || m.pokeDmgDone <= 0) return;
+      const segWidth = ((m.pokeDmgDone / boss.hp) * 100).toFixed(2);
+      const segColor = BOSS_SEG_COLORS[idx % BOSS_SEG_COLORS.length];
+      hpBarSegs += `<div class="bs-hp-seg" style="width:${segWidth}%;background:${segColor}" title="Slot #${m.slot} ${m.pokemon.name}: ${m.pokeDmgDone.toLocaleString()} dmg (${m.pctOfBoss}%)"></div>`;
+      hpLegendItems += `
+        <div class="bs-hp-legend-item">
+          <span class="bs-hp-legend-dot" style="background:${segColor}"></span>
+          <span>#${m.slot} ${m.pokemon.name}: <strong>${m.pctOfBoss}%</strong></span>
+        </div>
+      `;
+    });
+
+    if (battleResult.remainingBossHp > 0) {
+      const remWidth = ((battleResult.remainingBossHp / boss.hp) * 100).toFixed(2);
+      hpBarSegs += `<div class="bs-hp-seg" style="width:${remWidth}%;background:#da3633" title="Vida restante del Boss: ${battleResult.remainingBossHp.toLocaleString()} HP (${battleResult.bossHpPctRemaining}%)"></div>`;
+      hpLegendItems += `
+        <div class="bs-hp-legend-item">
+          <span class="bs-hp-legend-dot" style="background:#da3633"></span>
+          <span>Restante: <strong>${battleResult.bossHpPctRemaining}%</strong></span>
+        </div>
+      `;
+    }
+
+    const hpBarHtml = `
+      <div class="bs-hp-wrapper">
+        <div class="bs-hp-head">
+          <span>Vida de ${boss.name} (${boss.hp.toLocaleString()} HP)</span>
+          <span>Daño infligido: ${(boss.hp - battleResult.remainingBossHp).toLocaleString()} HP (${battleResult.bossHpPctDepleted}%) · Tiempo: ${totalTimeText}</span>
+        </div>
+        <div class="bs-hp-track">
+          ${hpBarSegs}
+        </div>
+        <div class="bs-hp-legend">
+          ${hpLegendItems}
+        </div>
+      </div>
+    `;
+
+    // Renderizar Grid de 6 Luchadores
+    let teamHtml = `<div class="bs-team-grid">`;
+
+    battleResult.members.forEach((m, idx) => {
+      const pk = m.pokemon;
+      const isSoloWinner = battleResult.soloKill && idx === 0;
+
+      let statusBadge = '';
+      if (m.didNotEnter) {
+        statusBadge = '<span class="bs-fc-status reserve">💤 En reserva</span>';
+      } else if (m.survived) {
+        statusBadge = '<span class="bs-fc-status survived">⭐ En pie (Victorioso)</span>';
+      } else {
+        statusBadge = `<span class="bs-fc-status fainted">💀 Cae a los ${formatSecsToMin(m.faintedAt)}</span>`;
+      }
+
+      const trainerDot = pk.dotColor || (trainers[pk.accIdx] && trainers[pk.accIdx].dot) || '#8b949e';
+      const trainerName = pk.trainerName || (trainers[pk.accIdx] && trainers[pk.accIdx].name) || ('C' + ((pk.accIdx || 0) + 1));
+
+      let clanBadgeHtml = '';
+      if (m.clanBonus && m.clanName) {
+        clanBadgeHtml = `<span class="bs-badge-clan" title="Bonificación de clan por afinidad de tipo">✨ Clan ${m.clanName} (+15% ATK)</span>`;
+      }
+
+      let heldBadgeHtml = '';
+      if (m.heldLabel) {
+        heldBadgeHtml = `<span class="bs-badge-held" title="Objeto equipado">${m.heldLabel}</span>`;
+      }
+
+      const speciesId = pk.speciesId || pk.id || 0;
+      const typesList = [pk.type1, pk.type2].filter(Boolean).map(t => `<span class="pk-type-tag ${String(t).toLowerCase()}">${t}</span>`).join(' ');
+
+      teamHtml += `
+        <div class="bs-fighter-card${isSoloWinner ? ' solo-winner' : ''}">
+          <div class="bs-fc-top">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="bs-slot-pill">Slot #${m.slot}</span>
+              <span class="bs-fc-trainer">
+                <span style="width:7px;height:7px;border-radius:50%;background:${trainerDot};flex:none"></span>
+                ${trainerName}
+              </span>
+            </div>
+            ${statusBadge}
+          </div>
+
+          <div class="bs-fc-body">
+            <div class="bs-fc-avatar">
+              <img src="https://poke.idleworld.online/assets/creatures/${speciesId}.png" onerror="this.src='https://poke.idleworld.online/assets/sprites/${speciesId}.png';this.onerror=null;" alt="${pk.name}">
+            </div>
+            <div class="bs-fc-info">
+              <div class="bs-fc-name-row">
+                <span>${pk.name}</span>
+                ${pk.shiny ? '<span style="color:var(--gold,#f2c665);font-size:12px">✨</span>' : ''}
+                <span class="pk-badge-lv" style="font-size:11px;padding:1px 6px">Nv. ${pk.level}</span>
+              </div>
+              <div class="bs-fc-sub">
+                <span>Q: x${pk.quality || 1}</span>
+                <span>IV: ${pk.ivTotal != null ? pk.ivTotal : '?'}</span>
+                <div>${typesList}</div>
+              </div>
+            </div>
+          </div>
+
+          ${(clanBadgeHtml || heldBadgeHtml) ? `<div class="bs-fc-badges">${clanBadgeHtml} ${heldBadgeHtml}</div>` : ''}
+
+          <div class="bs-fc-metrics">
+            <div class="bs-fc-metric-item">
+              <span class="bs-fc-metric-lbl">💥 Daño infligido</span>
+              <span class="bs-fc-metric-val" style="color:var(--gold,#f2c665)">${m.pokeDmgDone.toLocaleString()} <span style="font-size:11px;color:var(--mut)">(${m.pctOfBoss}%)</span></span>
+            </div>
+            <div class="bs-fc-metric-item">
+              <span class="bs-fc-metric-lbl">⚔️ Ataque</span>
+              <span class="bs-fc-metric-val">${m.pokeDmgPerHit.toLocaleString()} <span style="font-size:11px;color:var(--mut)">/ 1.35s</span></span>
+            </div>
+            <div class="bs-fc-metric-item">
+              <span class="bs-fc-metric-lbl">🛡️ Daño recibido</span>
+              <span class="bs-fc-metric-val">${m.bossDmgPerHit} <span style="font-size:11px;color:var(--mut)">/ golpe</span></span>
+            </div>
+            <div class="bs-fc-metric-item">
+              <span class="bs-fc-metric-lbl">⏱️ Resistencia</span>
+              <span class="bs-fc-metric-val">${m.effectiveHp ? Math.round(m.effectiveHp / m.bossDmgPerHit) : 0} golpes <span style="font-size:11px;color:var(--mut)">(~${formatSecsToMin((m.effectiveHp ? Math.round(m.effectiveHp / m.bossDmgPerHit) : 0) * boss.interval)})</span></span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    teamHtml += `</div>`;
+
+    bodyContent.innerHTML = scopeHtml + outcomeHtml + hpBarHtml + teamHtml;
+    window.bindBossScopeEvents(ov);
+  };
+
+  window.bindBossScopeEvents = function(ov) {
+    if (!ov) return;
+    const chips = ov.querySelectorAll('.bs-scope-chip');
+    chips.forEach(chip => {
+      chip.onclick = () => {
+        const sc = chip.getAttribute('data-scope');
+        if (sc) {
+          selectedBossScope = sc;
+          window.renderBossesModal();
+        }
+      };
+    });
+  };
+
+  // Botón de Bosses en topbar
+  window.mountBossesButton = function() {
+    const topbar = document.getElementById('topbar');
+    if (!topbar) return;
+
+    let btn = document.getElementById('bossesBtn');
+    if (btn) {
+      btn.title = 'Bosses\nSimulador de combate y selector del equipo óptimo de 6 Pokémon contra Giant Cruel y Ancient Aero';
+      btn.onclick = () => {
+        const ov = document.getElementById('bossesOverlay');
+        if (ov && ov.classList.contains('show')) {
+          window.closeBossesModal();
+        } else {
+          window.openBossesModal();
+        }
+      };
+      return;
+    }
+
+    const pokesBtn = document.getElementById('pokesBtn');
+    const target = pokesBtn ? pokesBtn.nextSibling : (document.getElementById('ocBtn') || document.getElementById('ivsBtn'));
+
+    btn = document.createElement('button');
+    btn.id = 'bossesBtn';
+    btn.title = 'Bosses\nSimulador de combate y selector del equipo óptimo de 6 Pokémon contra Giant Cruel y Ancient Aero';
+    btn.setAttribute('aria-label', 'Bosses');
+    btn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;font-weight:600;background:transparent;border:1px solid transparent;border-radius:6px;color:#c9d1d9;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease;';
+
+    const bossSvg = '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--red,#f85149)"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6 2 2-6-4-4-4 8z"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>';
+    btn.innerHTML = bossSvg + '<span class="lbl">Bosses ⚔️</span>';
+
+    btn.onmouseenter = () => {
+      if (!btn.classList.contains('on')) {
+        btn.style.background = 'var(--bd, #21262d)';
+        btn.style.borderColor = 'var(--bd2, #30363d)';
+        btn.style.color = 'var(--tx, #e6edf3)';
+      }
+    };
+    btn.onmouseleave = () => {
+      if (!btn.classList.contains('on')) {
+        btn.style.background = 'transparent';
+        btn.style.borderColor = 'transparent';
+        btn.style.color = '#c9d1d9';
+      }
+    };
+    btn.onclick = () => {
+      const ov = document.getElementById('bossesOverlay');
+      if (ov && ov.classList.contains('show')) {
+        window.closeBossesModal();
+      } else {
+        window.openBossesModal();
+      }
+    };
+
+    if (pokesBtn && pokesBtn.nextSibling) {
+      topbar.insertBefore(btn, pokesBtn.nextSibling);
+    } else if (target) {
+      topbar.insertBefore(btn, target);
+    } else {
+      topbar.appendChild(btn);
+    }
+  };
+
+
   // Botón en la barra superior (topbar)
   window.mountPokesButton = function() {
     const topbar = document.getElementById('topbar');
@@ -1914,6 +3357,8 @@
           if (oldScript) oldScript.remove();
           const oldPokes = document.getElementById('pokesOverlay');
           if (oldPokes) oldPokes.remove();
+          const oldBosses = document.getElementById('bossesOverlay');
+          if (oldBosses) oldBosses.remove();
 
           window.CUSTOM_COLUMNS = true;
           window.enhanceTableCard = () => {};
@@ -1927,6 +3372,7 @@
             }
             if (typeof refreshStats === 'function') refreshStats();
             if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+            if (typeof window.mountBossesButton === 'function') window.mountBossesButton();
             if (typeof window.enhanceInvCard === 'function') window.enhanceInvCard();
           };
 
@@ -1962,6 +3408,10 @@
       if (ov && ov.classList.contains('show')) {
         window.closePokesModal();
       }
+      const bsOv = document.getElementById('bossesOverlay');
+      if (bsOv && bsOv.classList.contains('show')) {
+        window.closeBossesModal();
+      }
     }
   });
 
@@ -1983,6 +3433,7 @@
   // Ejecución inicial y observación de cambios en el contenedor de cards y topbar
   setTimeout(() => {
     window.mountPokesButton();
+    window.mountBossesButton();
     window.enhanceInvCard();
     setupReloadUi();
 
@@ -1998,6 +3449,7 @@
     if (topbar && !window.__topbarPokesObserver) {
       window.__topbarPokesObserver = new MutationObserver(() => {
         window.mountPokesButton();
+        window.mountBossesButton();
         setupReloadUi();
       });
       window.__topbarPokesObserver.observe(topbar, { childList: true });
