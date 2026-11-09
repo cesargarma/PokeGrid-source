@@ -48,7 +48,7 @@ const { BOSSES_CONFIG, CLAN_TYPES_TABLE, getHeldItemBonus, evaluateCandidateVsBo
 // 2. Verificar configuración de los Bosses activos y sus assets
 assert.ok(BOSSES_CONFIG.cruel, 'Giant Cruel debe existir');
 assert.equal(BOSSES_CONFIG.cruel.level, 600, 'Giant Cruel debe ser nivel 600');
-assert.equal(BOSSES_CONFIG.cruel.hp, 4200000, 'Giant Cruel debe tener 4.2M HP');
+assert.equal(BOSSES_CONFIG.cruel.hp, 79240, 'Giant Cruel debe tener 79.240 HP');
 assert.ok(BOSSES_CONFIG.cruel.avatar.startsWith('https://'), 'Giant Cruel debe tener URL de avatar');
 assert.ok(BOSSES_CONFIG.cruel.drops.length >= 8, 'Giant Cruel debe tener al menos 8 drops definidos');
 BOSSES_CONFIG.cruel.drops.forEach(d => {
@@ -58,7 +58,7 @@ BOSSES_CONFIG.cruel.drops.forEach(d => {
 
 assert.ok(BOSSES_CONFIG.aerodactyl2, 'Ancient Aero debe existir');
 assert.equal(BOSSES_CONFIG.aerodactyl2.level, 500, 'Ancient Aero debe ser nivel 500');
-assert.equal(BOSSES_CONFIG.aerodactyl2.hp, 2300000, 'Ancient Aero debe tener 2.3M HP');
+assert.equal(BOSSES_CONFIG.aerodactyl2.hp, 79240, 'Ancient Aero debe tener 79.240 HP');
 assert.ok(BOSSES_CONFIG.aerodactyl2.avatar.startsWith('https://'), 'Ancient Aero debe tener URL de avatar');
 assert.ok(BOSSES_CONFIG.aerodactyl2.drops.length >= 8, 'Ancient Aero debe tener al menos 8 drops definidos');
 BOSSES_CONFIG.aerodactyl2.drops.forEach(d => {
@@ -66,7 +66,7 @@ BOSSES_CONFIG.aerodactyl2.drops.forEach(d => {
   assert.ok(getItemIconUrl(d.icon).startsWith('https://'), `Icono de ${d.name} debe resolver a URL válida`);
 });
 
-console.log('OK  BOSSES_CONFIG validado (Giant Cruel 4.2M HP, Ancient Aero 2.3M HP, avatares y drops con iconos)');
+console.log('OK  BOSSES_CONFIG validado (Giant Cruel 79.2K HP, Ancient Aero 79.2K HP, avatares y drops con iconos)');
 
 // 3. Verificar tabla de Clanes
 assert.ok(CLAN_TYPES_TABLE.naturia.includes('GRASS') && CLAN_TYPES_TABLE.naturia.includes('BUG'), 'Naturia debe incluir Grass y Bug');
@@ -105,9 +105,9 @@ console.log('OK  Sinergia de clan evaluada (+15% ATK aplicado en Venusaur [Natur
 
 // 6. Prueba de combate: Victoria en Equipo
 const team = [
-  { name: 'Tyranitar', level: 689, quality: 1.8, type1: 'ROCK', type2: 'DARK', power: 22000, stats: { hp: 7500, atk: 1900, def: 1800, spa: 1600, spd: 1600, vel: 1200 }, clan: 'orebound', heldItem: 'X-Vitality' },
-  { name: 'Exeggutor', level: 626, quality: 1.8, type1: 'GRASS', type2: 'PSYCHIC', power: 18000, stats: { hp: 5500, atk: 1500, def: 1300, spa: 1600, spd: 1100, vel: 1200 }, clan: 'naturia', heldItem: 'X-Boost' },
-  { name: 'Dragonite', level: 525, quality: 1.8, type1: 'DRAGON', type2: 'FLYING', power: 16000, stats: { hp: 5800, atk: 1600, def: 1100, spa: 1300, spd: 1200, vel: 1100 }, clan: 'wingeon', heldItem: 'X-Attack' },
+  { name: 'Tyranitar', level: 689, quality: 1.8, type1: 'ROCK', type2: 'DARK', power: 22000, stats: { hp: 1975, atk: 1764, def: 1875, spa: 1687, spd: 1632, vel: 1216 }, clan: null, heldItem: 'vida_3' },
+  { name: 'Exeggutor', level: 565, quality: 2.18, type1: 'GRASS', type2: 'PSYCHIC', power: 18000, stats: { hp: 1887, atk: 1678, def: 1573, spa: 1910, spd: 1340, vel: 1412 }, clan: null, heldItem: '' },
+  { name: 'Dragonite', level: 525, quality: 1.8, type1: 'DRAGON', type2: 'FLYING', power: 16000, stats: { hp: 1367, atk: 1386, def: 1067, spa: 1042, spd: 1327, vel: 1294 }, clan: 'wingeon', heldItem: 'X-Attack' },
   { name: 'Rampardos', level: 480, quality: 1.77, type1: 'ROCK', power: 14000, stats: { hp: 4800, atk: 1650, def: 850, spa: 500, spd: 700, vel: 800 }, clan: 'orebound', heldItem: '' },
   { name: 'Snorlax', level: 450, quality: 1.8, type1: 'NORMAL', power: 13000, stats: { hp: 6500, atk: 1100, def: 950, spa: 600, spd: 1200, vel: 300 }, clan: 'gardestrike', heldItem: 'X-Vitality' },
   { name: 'Rhyperior', level: 420, quality: 1.7, type1: 'GROUND', type2: 'ROCK', power: 12000, stats: { hp: 5200, atk: 1400, def: 1300, spa: 500, spd: 700, vel: 400 }, clan: 'orebound', heldItem: 'X-Defense' }

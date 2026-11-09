@@ -2512,11 +2512,12 @@
       avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png',
       avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png',
       types: ['AGUA', 'VENENO'],
-      hp: 4200000,
-      atk: 1450,
-      def: 1380,
-      interval: 3.0,
-      desc: 'Boss de Nv. 600 · 4.2M HP · Daño puro sin tipos',
+      hp: 79240,
+      atkType: 'special',
+      atkStat: 'spd',
+      baseDamageConst: 3786830,
+      interval: 2.0,
+      desc: 'Boss de Nv. 600 · 79.2K HP · Giant Poison Burst (Ataque Especial continuo)',
       drops: [
         { id: 40575, name: 'AoE TM Disk', icon: '/assets/items/tm_disk_aoe.png', cat: 'TMs', chance: '0.08%', rarity: 'legendary', desc: 'Disco que enseña ataque básico en área sin cooldown (drop legendario)' },
         { id: 40530, name: 'AoE TM Disk Piece', icon: '/assets/items/tm_piece_aoe.png', cat: 'Loot', chance: '1.2%', rarity: 'epic', desc: 'Fragmentos para forjar el disco de ataque en área' },
@@ -2538,11 +2539,12 @@
       avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png',
       avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png',
       types: ['ROCA', 'VOLADOR'],
-      hp: 2300000,
-      atk: 1520,
-      def: 1150,
-      interval: 2.8,
-      desc: 'Boss de Nv. 500 · 2.3M HP · Daño puro sin tipos',
+      hp: 79240,
+      atkType: 'physical',
+      atkStat: 'def',
+      baseDamageConst: 1240530,
+      interval: 2.0,
+      desc: 'Boss de Nv. 500 · 79.2K HP · Ultracharged Hyperbeam (Ataque Físico continuo)',
       drops: [
         { id: 59212, name: 'Rock-Type TM Disk', icon: '/assets/items/tm_disk_elemental.png', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Roca' },
         { id: 59209, name: 'Flying-Type TM Disk', icon: '/assets/items/tm_disk_elemental.png', cat: 'TMs', chance: '0.25%', rarity: 'epic', desc: 'Disco técnico elemental de tipo Volador' },
@@ -2603,10 +2605,15 @@
   function getHeldItemBonus(heldStr) {
     if (!heldStr) return { hp: 1.0, atk: 1.0, def: 1.0, label: null };
     const h = String(heldStr).toLowerCase();
-    if (h.includes('vitality') || h.includes('vida')) return { hp: 1.15, atk: 1.0, def: 1.0, label: 'X-Vitality (+15% HP)' };
-    if (h.includes('attack') || h.includes('ataque')) return { hp: 1.0, atk: 1.15, def: 1.0, label: 'X-Attack (+15% ATK)' };
-    if (h.includes('defense') || h.includes('defesa')) return { hp: 1.0, atk: 1.0, def: 1.15, label: 'X-Defense (+15% DEF)' };
-    if (h.includes('boost') || h.includes('misto')) return { hp: 1.0, atk: 1.10, def: 1.10, label: 'X-Boost (+10% ATK/DEF)' };
+    const tierMatch = h.match(/(?:tier\s*|_)([0-9]+)/);
+    const tierNum = tierMatch ? parseInt(tierMatch[1], 10) : null;
+    const tierPct = tierNum !== null ? (tierNum * 0.01) : 0.15;
+    const tierLabel = tierNum !== null ? (' (Nv. ' + tierNum + ' · +' + tierNum + '%)') : ' (+15%)';
+
+    if (h.includes('vitality') || h.includes('vida')) return { hp: 1.0 + tierPct, atk: 1.0, def: 1.0, label: 'X-Vitality' + tierLabel };
+    if (h.includes('attack') || h.includes('ataque')) return { hp: 1.0, atk: 1.0 + tierPct, def: 1.0, label: 'X-Attack' + tierLabel };
+    if (h.includes('defense') || h.includes('defesa')) return { hp: 1.0, atk: 1.0, def: 1.0 + tierPct, label: 'X-Defense' + tierLabel };
+    if (h.includes('boost') || h.includes('misto')) return { hp: 1.0, atk: 1.0 + (tierNum !== null ? tierPct : 0.10), def: 1.0 + (tierNum !== null ? tierPct : 0.10), label: 'X-Boost' + (tierNum !== null ? tierLabel : ' (+10%)') };
     if (h.includes('exp') || h.includes('experience')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Exp (+Exp)' };
     if (h.includes('lucky') || h.includes('sorte')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Lucky (+Loot)' };
     return { hp: 1.0, atk: 1.0, def: 1.0, label: heldStr };
@@ -2629,29 +2636,52 @@
 
     const s = pk.stats || {};
     const baseHp = +(s.hp || pk.hp || (pk.level * 4.5));
-    const baseAtk = Math.max(+(s.atk || 0), +(s.spa || 0), +(pk.power || 0) * 0.15 || 100);
-    const baseDef = Math.max(50, ((+(s.def || 0) || 100) + (+(s.spd || 0) || 100)) / 2);
+    const baseAtk = +(s.atk || 0);
+    const baseSpa = +(s.spa || 0);
+    const baseDef = +(s.def || 0) || 100;
+    const baseSpd = +(s.spd || 0) || 100;
 
-    const effectiveHp = Math.round(baseHp * heldInfo.hp * (clanMult > 1 ? 1.05 : 1.0));
-    const effectiveAtk = Math.round(baseAtk * heldInfo.atk * clanMult);
+    // En batallas de Boss (escala oficial de Poke Idle World / Piwdex):
+    // Cada Pokémon cuenta en batalla con 12x de su HP stat base
+    const effectiveHp = Math.round(baseHp * 12.0 * heldInfo.hp * (clanMult > 1 ? 1.05 : 1.0));
+    const effectiveAtk = Math.round((baseAtk || 100) * heldInfo.atk * clanMult);
+    const effectiveSpa = Math.round((baseSpa || 100) * heldInfo.atk * clanMult);
     const effectiveDef = Math.round(baseDef * heldInfo.def * (clanMult > 1 ? 1.05 : 1.0));
+    const effectiveSpd = Math.round(baseSpd * heldInfo.def * (clanMult > 1 ? 1.05 : 1.0));
 
-    const bossDmgPerHit = Math.max(15, Math.round((boss.atk / Math.max(10, effectiveDef)) * 340));
-    const hitsSurviving = Math.max(1, Math.floor(effectiveHp / bossDmgPerHit));
-    const survivalSecs = hitsSurviving * (boss.interval || 3.0);
+    // El daño del boss depende del ataque especial o físico y la defensa del Pokémon:
+    // Ancient Aero usa Ultracharged Hyperbeam (físico -> DEF)
+    // Giant Cruel usa Giant Poison Burst (especial -> SP.DEF)
+    let bossDmgPerHit = 600;
+    if (boss.id === 'aerodactyl2') {
+      bossDmgPerHit = Math.max(20, Math.round(1240530 / Math.max(10, effectiveDef) + 1.87));
+    } else if (boss.id === 'cruel') {
+      bossDmgPerHit = Math.max(20, Math.round(3786830 / Math.max(10, effectiveSpd) + 1.89));
+    } else {
+      const defTarget = boss.atkStat === 'spd' ? effectiveSpd : effectiveDef;
+      bossDmgPerHit = Math.max(20, Math.round((boss.baseDamageConst || 1500000) / Math.max(10, defTarget) + 2));
+    }
 
-    const qMult = +pk.quality > 0 ? +pk.quality : 1.0;
-    const power = +pk.power > 0 ? +pk.power : (effectiveAtk * 8);
-    const pokeDmgPerHit = Math.max(10, Math.round((effectiveAtk / Math.max(10, boss.def)) * power * 0.22 * qMult));
-    const hitsDealt = Math.max(1, Math.floor(survivalSecs / 1.35));
+    const bossInterval = boss.interval || 2.0;
+    // Hits de boss que resiste antes de caer
+    const hitsSurviving = Math.max(1, Math.ceil(effectiveHp / bossDmgPerHit));
+    const survivalSecs = Math.min(80, (hitsSurviving - 1) * bossInterval);
+
+    // Daño del Pokémon al Boss
+    const offStat = Math.max(effectiveAtk, effectiveSpa);
+    const qMult = +pk.quality > 0 ? +pk.quality : 1.8;
+    const pokeDmgPerHit = Math.max(10, Math.round(offStat * 0.859 * (qMult / 1.8)));
+    const pokeInterval = 1.574;
+    const hitsDealt = Math.max(1, Math.floor(survivalSecs / pokeInterval));
     const totalDmgDealt = hitsDealt * pokeDmgPerHit;
     const pctOfBoss = +((totalDmgDealt / boss.hp) * 100).toFixed(1);
 
     return {
       pokemon: pk,
       effectiveHp,
-      effectiveAtk,
+      effectiveAtk: offStat,
       effectiveDef,
+      effectiveSpd,
       clanMult,
       clanName,
       heldInfo,
@@ -2683,12 +2713,12 @@
       let bossHits = 0;
       let faintedAt = null;
 
-      const pokeInterval = 1.35;
-      const bossInterval = boss.interval || 3.0;
+      const pokeInterval = 1.574;
+      const bossInterval = boss.interval || 2.0;
       let nextPokeHit = currentTime + pokeInterval;
       let nextBossHit = currentTime + bossInterval;
 
-      while (pkHp > 0 && remainingBossHp > 0) {
+      while (pkHp > 0 && remainingBossHp > 0 && currentTime < 82.0) {
         if (nextPokeHit <= nextBossHit) {
           currentTime = nextPokeHit;
           const dmg = evalRes.pokeDmgPerHit;
@@ -2709,7 +2739,7 @@
           nextBossHit += bossInterval;
           if (pkHp <= 0) {
             pkHp = 0;
-            faintedAt = currentTime;
+            faintedAt = Math.round(currentTime * 10) / 10;
             break;
           }
         }
@@ -2719,7 +2749,7 @@
       battleLog.push({
         slot: i + 1,
         pokemon: pk,
-        enteredAt,
+        enteredAt: Math.round(enteredAt * 10) / 10,
         faintedAt,
         survived: pkHp > 0,
         pokeDmgDone,
@@ -2733,7 +2763,7 @@
         heldLabel: evalRes.heldInfo.label
       });
 
-      if (victory) break;
+      if (victory || currentTime >= 82.0) break;
     }
 
     for (let j = battleLog.length; j < team.length; j++) {
@@ -2765,7 +2795,7 @@
     return {
       victory,
       soloKill,
-      totalTime: currentTime,
+      totalTime: Math.round(currentTime * 10) / 10,
       bossMaxHp: boss.hp,
       remainingBossHp,
       bossHpPctRemaining: +((remainingBossHp / boss.hp) * 100).toFixed(1),
@@ -2815,9 +2845,9 @@
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
                 <span class="bs-boss-name">Giant Cruel</span>
-                <span class="bs-boss-stat-tag">Nv. 600 · 4.2M HP</span>
+                <span class="bs-boss-stat-tag">Nv. 600 · 79.2K HP</span>
               </div>
-              <span class="bs-boss-sub">ATK: 1.450 · DEF: 1.380 · Cadencia: 3.0s · Daño puro</span>
+              <span class="bs-boss-sub">Giant Poison Burst (Especial) · Cadencia: 2.0s · Máx: 80s</span>
             </div>
           </div>
 
@@ -2828,9 +2858,9 @@
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
                 <span class="bs-boss-name">Ancient Aero</span>
-                <span class="bs-boss-stat-tag">Nv. 500 · 2.3M HP</span>
+                <span class="bs-boss-stat-tag">Nv. 500 · 79.2K HP</span>
               </div>
-              <span class="bs-boss-sub">ATK: 1.520 · DEF: 1.150 · Cadencia: 2.8s · Daño puro</span>
+              <span class="bs-boss-sub">Ultracharged Hyperbeam (Físico) · Cadencia: 2.0s · Máx: 80s</span>
             </div>
           </div>
         </div>
