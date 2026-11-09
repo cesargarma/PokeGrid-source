@@ -3187,8 +3187,91 @@
     const lv300Pokes = candidates.filter(p => +p.level >= 300);
     const pool = lv300Pokes.length > 0 ? lv300Pokes : candidates;
 
+    // Barra de Clan: En 'all', permite elegir qué clan de los desbloqueados activar (0% por defecto)
+    // En cuenta individual, muestra el clan fijado por el entrenador
+    const unlockedClans = [];
+    const seenClans = new Set();
+    trainers.forEach(tr => {
+      if (tr.clan) {
+        const cKey = String(tr.clan).toLowerCase().trim();
+        if (!seenClans.has(cKey)) {
+          seenClans.add(cKey);
+          unlockedClans.push(cKey);
+        }
+      }
+    });
+    allPokes.forEach(pk => {
+      if (pk.clan) {
+        const cKey = String(pk.clan).toLowerCase().trim();
+        if (!seenClans.has(cKey)) {
+          seenClans.add(cKey);
+          unlockedClans.push(cKey);
+        }
+      }
+    });
+
+    let clanBarHtml = '';
+    let activeBattleClan = null;
+
+    if (selectedBossScope === 'all') {
+      activeBattleClan = (selectedGlobalClan && selectedGlobalClan !== 'none') ? selectedGlobalClan : null;
+
+      let clanChipsHtml = `
+        <button class="bs-clan-chip${selectedGlobalClan === 'none' ? ' on' : ''}" data-clan="none">
+          🚫 Sin Clan (0% bonus por defecto)
+        </button>
+      `;
+      unlockedClans.forEach(cKey => {
+        const cInfo = CLAN_INFO[cKey] || { name: cKey.charAt(0).toUpperCase() + cKey.slice(1), icon: '⚔️', typesText: '', color: 'var(--tx)' };
+        const isOn = selectedGlobalClan === cKey;
+        clanChipsHtml += `
+          <button class="bs-clan-chip${isOn ? ' on' : ''}" data-clan="${cKey}" style="${isOn ? 'border-color:' + cInfo.color + ';box-shadow:0 0 6px ' + cInfo.color + '33' : ''}">
+            <span>${cInfo.icon}</span>
+            <strong style="color:${cInfo.color}">${cInfo.name}</strong>
+            <span class="bs-clan-types">(${cInfo.typesText})</span>
+          </button>
+        `;
+      });
+
+      clanBarHtml = `
+        <div class="bs-clan-bar">
+          <div class="bs-clan-head">
+            <span class="bs-clan-lbl">🛡️ Bonus de Clan Activo (Simulación Global):</span>
+            <span class="bs-clan-sub">Solo se puede entrar a batalla con 1 clan a la vez. Selecciona cuál de tus clanes desbloqueados deseas activar (+15% ATK a los miembros de ese tipo):</span>
+          </div>
+          <div class="bs-clan-chips">
+            ${clanChipsHtml}
+          </div>
+          ${unlockedClans.length === 0 ? '<div class="bs-clan-empty-tip">ℹ️ No se detectaron clanes desbloqueados en tus cuentas vinculadas. Se simula con estadísticas puras.</div>' : ''}
+        </div>
+      `;
+    } else {
+      const trIdx = +selectedBossScope;
+      const curTr = trainers.find(t => t.idx === trIdx) || trainers[trIdx];
+      const trClanSlug = curTr && curTr.clan ? String(curTr.clan).toLowerCase().trim() : null;
+      activeBattleClan = trClanSlug || null;
+      const cInfo = trClanSlug ? (CLAN_INFO[trClanSlug] || { name: trClanSlug.charAt(0).toUpperCase() + trClanSlug.slice(1), icon: '⚔️', typesText: '', color: 'var(--tx)' }) : null;
+
+      clanBarHtml = `
+        <div class="bs-clan-bar">
+          <div class="bs-clan-fixed">
+            <span class="bs-clan-lbl">🛡️ Clan del Entrenador:</span>
+            ${cInfo ? `
+              <span class="bs-clan-badge" style="border-color:${cInfo.color};color:${cInfo.color}">
+                <span>${cInfo.icon}</span>
+                <strong>Clan ${cInfo.name}</strong>
+                <span style="font-weight:400;opacity:0.85">(${cInfo.typesText}) · +15% ATK a sus tipos</span>
+              </span>
+            ` : `
+              <span class="bs-clan-badge mut">🚫 Sin Clan asignado (0% bonus)</span>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
     if (pool.length === 0) {
-      bodyContent.innerHTML = scopeHtml + `
+      bodyContent.innerHTML = scopeHtml + clanBarHtml + `
         <div class="pk-state-msg" style="padding:40px;display:flex;flex-direction:column;gap:8px">
           <span>No se encontraron Pokémon disponibles para simular el combate.</span>
           <span style="font-size:11.5px;color:var(--mut)">Asegúrate de que las cuentas tengan Pokémon cargados o pulsa "Re-analizar".</span>
@@ -3200,15 +3283,14 @@
 
     // Evaluar y ordenar por daño total
     pool.forEach(pk => {
-      const clanToUse = pk.clan || (trainers[pk.accIdx] && trainers[pk.accIdx].clan) || null;
-      pk.__bossEval = evaluateCandidateVsBoss(pk, boss, clanToUse);
+      pk.__bossEval = evaluateCandidateVsBoss(pk, boss, activeBattleClan);
     });
 
     pool.sort((a, b) => (b.__bossEval.totalDmgDealt - a.__bossEval.totalDmgDealt) || (b.level - a.level));
 
     // Tomar los 6 mejores
     const top6 = pool.slice(0, 6);
-    const battleResult = simulateTeamBattle(top6, boss, null);
+    const battleResult = simulateTeamBattle(top6, boss, activeBattleClan);
 
     // Renderizar Banner de Resultado
     let outcomeHtml = '';
@@ -3418,9 +3500,18 @@
         }
       };
     });
+    const clanChips = ov.querySelectorAll('.bs-clan-chip');
+    clanChips.forEach(chip => {
+      chip.onclick = () => {
+        const cl = chip.getAttribute('data-clan');
+        if (cl) {
+          selectedGlobalClan = cl;
+          window.renderBossesModal();
+        }
+      };
+    });
   };
 
-  // Botón de Bosses en topbar
   window.mountBossesButton = function() {
     const topbar = document.getElementById('topbar');
     if (!topbar) return;

@@ -168,4 +168,96 @@ assert.ok(resDefeat.bossHpPctRemaining > 90, 'El boss debe conservar casi toda l
 
 console.log('OK  Simulación Derrota: Equipo débil fainted y vida restante del boss correcta');
 
+// 9. Verificar renderBossesModal y selector de clanes en DOM mockeado
+class MockElement {
+  constructor(tag, id = '') {
+    this.tagName = tag.toUpperCase();
+    this.id = id;
+    this.className = '';
+    this.classList = {
+      _classes: new Set(),
+      add: (c) => this.classList._classes.add(c),
+      remove: (c) => this.classList._classes.delete(c),
+      toggle: (c, v) => v ? this.classList._classes.add(c) : this.classList._classes.delete(c),
+      contains: (c) => this.classList._classes.has(c)
+    };
+    this.attributes = {};
+    this.style = {};
+    this.innerHTML = '';
+    this.textContent = '';
+    this.children = [];
+    this._onclick = null;
+  }
+  set onclick(fn) { this._onclick = fn; }
+  get onclick() { return this._onclick; }
+  getAttribute(name) { return this.attributes[name] || null; }
+  setAttribute(name, val) { this.attributes[name] = String(val); }
+  querySelector(sel) {
+    if (sel.startsWith('#')) {
+      const id = sel.slice(1);
+      if (this.id === id) return this;
+      for (const child of this.children) {
+        const found = child.querySelector(sel);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  querySelectorAll(sel) {
+    const res = [];
+    const check = (node) => {
+      if (sel.startsWith('.') && node.className.includes(sel.slice(1))) res.push(node);
+      for (const child of node.children) check(child);
+    };
+    check(this);
+    return res;
+  }
+  appendChild(child) { this.children.push(child); return child; }
+  remove() {}
+}
+
+const mockOverlay = new MockElement('div', 'bossesOverlay');
+mockOverlay.classList.add('show');
+const mockBodyContent = new MockElement('div', 'bsBodyContent');
+mockOverlay.children.push(mockBodyContent);
+
+const mockDoc = {
+  getElementById: (id) => {
+    if (id === 'bossesOverlay') return mockOverlay;
+    if (id === 'bsBodyContent') return mockBodyContent;
+    return null;
+  },
+  querySelector: () => null,
+  querySelectorAll: () => [],
+  createElement: (tag) => new MockElement(tag),
+  body: new MockElement('body'),
+  head: new MockElement('head')
+};
+
+const mockWindow = {
+  document: mockDoc,
+  localStorage: { getItem: () => null, setItem: () => {} },
+  addEventListener: () => {},
+  setTimeout: () => {},
+  setInterval: () => {},
+  __pokesTrainers: [{ idx: 0, name: 'Ash', dot: '#ff0000', clan: 'orebound' }],
+  __pokes300Data: [
+    { name: 'Tyranitar', level: 689, quality: 1.8, type1: 'ROCK', type2: 'DARK', power: 22000, stats: { hp: 1975, atk: 1764, def: 1875, spa: 1687, spd: 1632, vel: 1216 }, accIdx: 0, heldItem: 'vida_3' }
+  ]
+};
+
+const fullFn = new Function('window', 'document', 'localStorage', 'setTimeout', 'setInterval', customUiSrc);
+fullFn(mockWindow, mockDoc, mockWindow.localStorage, () => {}, () => {});
+
+assert.equal(typeof mockWindow.renderBossesModal, 'function', 'renderBossesModal debe estar disponible');
+mockWindow.renderBossesModal();
+
+assert.ok(mockBodyContent.innerHTML.includes('bs-clan-bar'), 'El modal debe renderizar la barra de clanes');
+assert.ok(mockBodyContent.innerHTML.includes('bs-clan-chips'), 'El modal debe renderizar los chips de clanes');
+assert.ok(mockBodyContent.innerHTML.includes('Sin Clan (0% bonus por defecto)'), 'El modal debe incluir la opción Sin Clan por defecto');
+assert.ok(mockBodyContent.innerHTML.includes('Orebound'), 'El modal debe incluir el chip de Orebound desbloqueado');
+assert.ok(mockBodyContent.innerHTML.includes('bs-fighter-card'), 'El modal debe renderizar los cards de luchadores');
+
+console.log('OK  renderBossesModal en DOM mockeado: renderizado completo y sin errores en tiempo de ejecución');
+
 console.log('\n¡TODAS LAS PRUEBAS DEL SIMULADOR DE BOSSES PASARON AL 100%!');
