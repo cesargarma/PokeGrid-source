@@ -1,5 +1,13 @@
 // src/custom-ui.js - Extensión de UI en vivo para PokeGrid (recarga sin reiniciar juegos)
 (function() {
+  window.CUSTOM_COLUMNS = true;
+  window.enhanceTableCard = () => {};
+  try {
+    if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
+      if (typeof cdHtmlAnt !== 'undefined') cdHtmlAnt = '';
+      refreshCards(true);
+    }
+  } catch {}
   // Asegurar que cdInvF no mantenga un filtro estricto que destruya los elementos en SB.inv
   try {
     const lastF = localStorage.getItem('cdInvF');
@@ -1690,19 +1698,7 @@
       if (ov && ov.classList.contains('show')) {
         window.closePokesModal();
       } else {
-        window.openPokesModal();
-      }
-    };
-
-    if (target && target.nextSibling) {
-      topbar.insertBefore(btn, target.nextSibling);
-    } else {
-      topbar.appendChild(btn);
-    }
-  };
-
-  // Re-enlazar botón "Refrescar UI" para garantizar recarga con cache-busting y limpieza de modals
-  const setupReloadUi = function() {
+        window.openPokesMconst setupReloadUi = function() {
     const btn = document.getElementById('reloadUi');
     if (btn && !btn.__customReloadBound) {
       btn.__customReloadBound = true;
@@ -1711,35 +1707,57 @@
           location.reload();
           return;
         }
+        btn.disabled = true;
+        const origText = btn.textContent;
+        btn.textContent = 'Refrescando…';
         try {
           const oldScript = document.getElementById('pgCustomScript');
           if (oldScript) oldScript.remove();
           const oldPokes = document.getElementById('pokesOverlay');
           if (oldPokes) oldPokes.remove();
 
-          const s = document.createElement('script');
-          s.id = 'pgCustomScript';
-          s.src = 'src/custom-ui.js?_t=' + Date.now();
-          s.onload = () => {
+          window.CUSTOM_COLUMNS = true;
+          window.enhanceTableCard = () => {};
+
+          const finishReload = () => {
+            btn.disabled = false;
+            btn.textContent = origText;
             if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
-              cdHtmlAnt = '';
+              if (typeof cdHtmlAnt !== 'undefined') cdHtmlAnt = '';
               refreshCards(true);
             }
             if (typeof refreshStats === 'function') refreshStats();
             if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+            if (typeof window.enhanceInvCard === 'function') window.enhanceInvCard();
           };
+
+          const s = document.createElement('script');
+          s.id = 'pgCustomScript';
+          s.src = 'src/custom-ui.js?_t=' + Date.now();
+          s.onload = finishReload;
           s.onerror = () => {
             const s2 = document.createElement('script');
             s2.id = 'pgCustomScript';
             s2.src = 'src/custom-ui.js';
-            s2.onload = () => {
-              if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
-                cdHtmlAnt = '';
-                refreshCards(true);
-              }
-              if (typeof refreshStats === 'function') refreshStats();
-              if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+            s2.onload = finishReload;
+            s2.onerror = () => {
+              btn.disabled = false;
+              btn.textContent = origText;
             };
+            document.body.appendChild(s2);
+          };
+          document.body.appendChild(s);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = origText;
+          console.error('Error al refrescar UI:', err);
+        }
+      };
+    }
+  };
+
+  // Tecla Escape cierra modal de Pokémon si está abierto
+      };
             document.body.appendChild(s2);
           };
           document.body.appendChild(s);

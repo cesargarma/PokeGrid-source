@@ -3096,7 +3096,7 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     // XP total pra chegar ao nivel: a totalXpForLevel do jogo (29x3d9sblzixv.js), cubica ate o 150, outro polinomio ate o 250 e depois C(250) + 2x
     const xpC = n => n<=1?0:Math.round(50/3*(n**3-6*n**2+17*n-12));
     const xpNv = n => { n = Math.floor(n); if (n <= 150) return xpC(n); const t = n - 150; if (t <= 100) return Math.round(xpC(150) + .5*(t*(t+1)/2)**2 + t*(t+1)*(2*t+1)/6*197.5 + t*(t+1)/2*25629 + 1087900*t); return Math.round(xpNv(250) + 2*(xpC(n) - xpC(250))); };
-    const team = ((ws.pokes && ws.pokes.list)||[]).filter(p=>p.team).sort((x,y)=>(x.slot||0)-(y.slot||0)).map(p=>({id:p.id!=null?String(p.id).slice(0,40):'',name:p.name,level:p.level,shiny:!!p.shiny,t1:p.type1||'',t2:p.type2||'',ld:!!p.leader,q:nL(p.quality),ivt:p.ivTotal!=null?nL(p.ivTotal):null,dt:!!p.isDitto,tms:(Array.isArray(p.tms)?p.tms:[]).slice(0,24).map(x=>String(x).toUpperCase().slice(0,12)),sid:+p.speciesId||+p.pokeId||0,pw:+p.power||0,hp:+p.hp||0,hm:+p.maxHp||+p.hpMax||+p.totalHp||0,xpp:(+p.xp>0&&+p.level>0?(X=>{const a=X(+p.level),b=X(+p.level+1);return b>a?Math.round((+p.xp-a)/(b-a)*100):null})(xpNv):null)}));
+    const team = ((ws.pokes && ws.pokes.list)||[]).filter(p=>p.team).sort((x,y)=>(x.slot||0)-(y.slot||0)).map(p=>{const lv=+p.level||1,xp=+p.xp||0,aX=xpNv(lv),bX=xpNv(lv+1),xpp=(xp>0&&bX>aX)?Math.min(100,Math.max(0,+(((xp-aX)/(bX-aX))*100).toFixed(1))):0,remXp=Math.max(0,bX-(xp>0?xp:aX));return{id:p.id!=null?String(p.id).slice(0,40):'',name:p.name,level:lv,xp,xpp,remXp,shiny:!!p.shiny,t1:p.type1||'',t2:p.type2||'',ld:!!p.leader,q:nL(p.quality),ivt:p.ivTotal!=null?nL(p.ivTotal):null,dt:!!p.isDitto,tms:(Array.isArray(p.tms)?p.tms:[]).slice(0,24).map(x=>String(x).toUpperCase().slice(0,12)),sid:+p.speciesId||+p.pokeId||0,pw:+p.power||0,hp:+p.hp||0,hm:+p.maxHp||+p.hpMax||+p.totalHp||0};});
     let hunt = (ws['field-init'] && ws['field-init'].slug) || '';
     hunt = hunt.replace(/[_-]+/g,' ').replace(/\\b\\w/g, m=>m.toUpperCase());
     const mail = ws['mail-badge'] || {};
@@ -4659,8 +4659,28 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     dhist.push({ t: Date.now(), g: sumG, x: sumX });
     dhist = dhist.filter(p => p.t > Date.now() - 3600e3);
 
+    const xpC_h = n => n <= 1 ? 0 : Math.round(50 / 3 * (n ** 3 - 6 * n ** 2 + 17 * n - 12));
+    const xpNv_h = n => { n = Math.floor(n); if (n <= 150) return xpC_h(n); const t = n - 150; if (t <= 100) return Math.round(xpC_h(150) + .5 * (t * (t + 1) / 2) ** 2 + t * (t + 1) * (2 * t + 1) / 6 * 197.5 + t * (t + 1) / 2 * 25629 + 1087900 * t); return Math.round(xpNv_h(250) + 2 * (xpC_h(n) - xpC_h(250))); };
+    const calcRemXp = (lead) => {
+      if (!lead) return 0;
+      if (lead.remXp != null) return lead.remXp;
+      const lv = +lead.level || 1, a = xpNv_h(lv), b = xpNv_h(lv + 1);
+      if (lead.xp != null && +lead.xp > 0) return Math.max(0, b - +lead.xp);
+      const pct = lead.xpp != null ? +lead.xpp : 0;
+      return Math.max(0, Math.round((b - a) * (100 - pct) / 100));
+    };
+    const fmtLvlUp = (secs) => {
+      if (secs == null || !Number.isFinite(secs) || secs < 0) return '—';
+      if (secs < 60) return '< 1m';
+      const tm = Math.round(secs / 60), h = Math.floor(tm / 60), m = tm % 60;
+      if (h >= 48) { const d = Math.floor(h / 24), hr = h % 24; return d + 'd' + (hr ? ' ' + hr + 'h' : ''); }
+      return h ? h + 'h ' + String(m).padStart(2, '0') + 'm' : m + 'm';
+    };
     const valOf = (r, k) => k === 'name' || k === 'hunt' ? String(r[k] || '').toLowerCase()
-      : k === 'lead' ? (r.lead ? +r.lead.level || 0 : -1) : k === 'best' ? bestScore(r.best) : k === 'last' ? (r.last ? r.last.t : 0) : k === 'st' ? r.st : (r[k] || 0);
+      : k === 'lead' ? (r.lead ? +r.lead.level || 0 : -1)
+      : k === 'xpp' ? (r.lead && r.lead.xpp != null ? +r.lead.xpp : -1)
+      : k === 'lvlup' ? (r.st === 'on' && r.lead && r.xph > 0 ? -((calcRemXp(r.lead) / r.xph) * 3600) : -Infinity)
+      : k === 'best' ? bestScore(r.best) : k === 'last' ? (r.last ? r.last.t : 0) : k === 'st' ? r.st : (r[k] || 0);
     const on = rows.filter(r => r.st === 'on');
     on.sort((p, q) => { const a2 = valOf(p, dsort.k), b2 = valOf(q, dsort.k); return (a2 > b2 ? 1 : a2 < b2 ? -1 : 0) * dsort.d; });
     const ordered = on.concat(rows.filter(r => r.st !== 'on'));
@@ -4699,8 +4719,11 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
         + '<div style="display:flex;gap:18px;margin-top:9px;font-size:11px;color:var(--mut);flex-wrap:wrap">' + linha(t('cdWeek'), W) + linha(t('cdAllTime'), A) + '</div></div>';
     };
     SB.table = () => {
+      const hasCustomCols = typeof window !== 'undefined' && !!window.CUSTOM_COLUMNS;
       const arrow = (k) => dsort.k === k ? (dsort.d < 0 ? ' ▾' : ' ▴') : '';
-      const TH = [['name', t('cdConta')], ['lead', t('cdPoke')], ['hunt', t('cdHunt')], ['secs', rotuloHtml('relogio', t('cdTime'))], ['gph', 'Gold/h'], ['xph', 'XP/h'], ['kph', 'Kills/h'], ['caps', t('stCaptures')], ['sh', ico('brilho')], ['best', t('cdBest')], ['last', t('cdLast')], ['st', t('cdStatus')]];
+      const TH = hasCustomCols
+        ? [['name', t('cdConta')], ['lead', t('cdPoke')], ['xpp', '% Exp'], ['lvlup', 'Lvl Up'], ['hunt', t('cdHunt')], ['secs', rotuloHtml('relogio', t('cdTime'))], ['gph', 'Gold/h'], ['xph', 'XP/h'], ['kph', 'Kills/h'], ['caps', t('stCaptures')], ['sh', ico('brilho')], ['best', t('cdBest')], ['last', t('cdLast')], ['st', t('cdStatus')]]
+        : [['name', t('cdConta')], ['lead', t('cdPoke')], ['hunt', t('cdHunt')], ['secs', rotuloHtml('relogio', t('cdTime'))], ['gph', 'Gold/h'], ['xph', 'XP/h'], ['kph', 'Kills/h'], ['caps', t('stCaptures')], ['sh', ico('brilho')], ['best', t('cdBest')], ['last', t('cdLast')], ['st', t('cdStatus')]];
       let s = '<div class="cd-sec"><div class="cd-h" style="display:flex;align-items:center;gap:8px">' + t('cdByAcc')
         + '<span style="margin-left:auto;display:flex;align-items:center;gap:6px;text-transform:none">' + t('cdBest') + ':'
         + '<select id="cdBestCrit" title="' + t('cdBestCritTitle') + '">'
@@ -4710,8 +4733,22 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
         + TH.map(x => '<th data-k="' + x[0] + '">' + x[1] + arrow(x[0]) + '</th>').join('') + '</tr></thead><tbody>';
       ordered.forEach(r => {
         const sc = statusConta(r.i); // a mesma pilula do cabecalho do painel; hunt e tempo ja tem coluna, entao o detalhe vai no title
+        const remXp = calcRemXp(r.lead);
+        const secsLvlUp = (r.st === 'on' && r.lead && r.xph > 0 && remXp > 0) ? Math.round((remXp / r.xph) * 3600) : null;
+        const xppVal = r.lead && r.lead.xpp != null ? r.lead.xpp : null;
+        const xppCell = xppVal != null
+          ? '<div style="display:flex;align-items:center;gap:6px" title="Faltan ' + nf(remXp) + ' XP para Nv. ' + ((r.lead.level || 0) + 1) + '">'
+            + '<span style="font-weight:600;color:var(--xp)">' + xppVal + '%</span>'
+            + '<div style="height:3px;width:34px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">'
+            + '<div style="height:100%;width:' + Math.min(100, Math.max(0, xppVal)) + '%;background:var(--xp);border-radius:2px"></div>'
+            + '</div></div>'
+          : '—';
+        const lvlUpCell = secsLvlUp != null
+          ? '<span style="font-weight:600;color:var(--tx)" title="Faltan ' + nf(remXp) + ' XP a ' + nc(r.xph) + ' XP/h">' + fmtLvlUp(secsLvlUp) + '</span>'
+          : '<span style="color:var(--mut)">—</span>';
         s += '<tr data-i="' + r.i + '"><td><span class="cd-dot" style="background:' + r.dot + '"></span>' + esc(r.name) + '</td>'
           + '<td>' + (r.lead ? (r.lead.shiny ? '✨ ' : '') + esc(r.lead.name) + ' <b style="color:var(--tx3)">Lv' + nf(r.lead.level) + '</b>' : '—') + '</td>'
+          + (hasCustomCols ? '<td>' + xppCell + '</td><td>' + lvlUpCell + '</td>' : '')
           + '<td>' + (r.hunt ? esc(r.hunt) + melhorTxt(r) : '—') + '</td>'
           + '<td style="color:var(--tx3)">' + (r.st === 'on' ? tsec(r.secs) : '—') + '</td>'
           + '<td style="color:' + ((r.gph || 0) < 0 ? 'var(--neg)' : 'var(--ok)') + '">' + (r.st === 'on' ? ncs(r.gph) : '—') + '</td>'
@@ -4723,7 +4760,9 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
           + '<td>' + (r.last ? '<span style="color:' + (r.last.q ? RARO(r.last.q)[1] : 'var(--tx)') + '">' + esc(r.last.n) + '</span> <span style="color:var(--mut)">' + fmtHM(r.last.t) + (r.since ? ' · ' + nf(r.since) + ' ' + ballIco : '') + '</span>' : '—') + '</td>'
           + '<td><span class="cd-st ' + sc.cls + '"' + (sc.sub ? ' title="' + esc(sc.sub) + '"' : '') + '>' + esc(sc.txt) + '</span></td></tr>';
       });
-      return s + '</tbody><tfoot><tr><td>' + t('cdTotal') + ' (' + ativos + ')</td><td></td><td></td><td></td>'
+      return s + '</tbody><tfoot><tr><td>' + t('cdTotal') + ' (' + ativos + ')</td><td></td>'
+        + (hasCustomCols ? '<td></td><td></td>' : '')
+        + '<td></td><td></td>'
         + '<td style="color:' + (sumG < 0 ? 'var(--neg)' : 'var(--ok)') + '">' + ncs(sumG) + '</td>'
         + '<td>' + nc(sumX) + '</td><td>' + nf(sumK) + '</td><td>' + nf(sumC) + '</td>'
         + '<td>' + nf(sumSF) + '</td><td></td><td></td><td></td></tr></tfoot></table></div>';
