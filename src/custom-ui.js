@@ -851,10 +851,9 @@
 
   const POKES_PRESETS = [
     { id: 'lv300', label: 'Nv 300+', badge: 'Nv 300+', test: pk => +pk.level >= 300, defaultSort: 'level', defaultAsc: false },
+    { id: 'session', label: 'Capturas (Sesión) 🎯', badge: 'Capturas de la Sesión 🎯', test: pk => !!pk.isSessionCatch, defaultSort: 'catchTime', defaultAsc: false },
     { id: 'team', label: 'En Equipo ⚔️', badge: 'En Equipo ⚔️', test: pk => !!pk.team, defaultSort: 'trainer', defaultAsc: true },
     { id: 'iv160', label: 'IV 160+ ⭐', badge: 'IV 160+ ⭐', test: pk => pk.ivTotal != null && +pk.ivTotal >= 160, defaultSort: 'ivTotal', defaultAsc: false },
-    { id: 'epic', label: 'Épica+ (×1.5) 💎', badge: 'Épica+ 💎', test: pk => +pk.quality >= 1.5, defaultSort: 'quality', defaultAsc: false },
-    { id: 'ditto', label: 'Dittos 🧬', badge: 'Dittos 🧬', test: pk => !!pk.isDitto || /ditto/i.test(pk.name), defaultSort: 'quality', defaultAsc: false },
     { id: 'all', label: 'Todos 🌐', badge: 'Todos 🌐', test: () => true, defaultSort: 'level', defaultAsc: false }
   ];
 
