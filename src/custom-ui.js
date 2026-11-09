@@ -472,6 +472,7 @@
       cursor: pointer;
       transition: all 0.15s ease;
       white-space: nowrap;
+      pointer-events: none;
     }
     .pk-row:hover .pk-btn-ver {
       background: #388bfd;
@@ -978,6 +979,9 @@
     const allPokes = [];
     const activeTrainers = [];
 
+    // Pre-cargar base stats de criaturas en paralelo
+    window.ensureCreaturesBaseStats().catch(() => {});
+
     const promises = webviews.map(async (wv, idx) => {
       if (!wv || off[idx]) return null;
       const dot = ACOR[idx] || '#8b949e';
@@ -1229,81 +1233,200 @@
     });
   };
 
-  // Abrir #ivCard con ese Pokémon seleccionado
-  window.openPokemonIv = function(pk, accIdx) {
-    let stats = pk.stats;
-    let power = pk.power;
-    const sp = String(pk.name || '').toLowerCase();
-
+  // Pre-cargar base stats de todas las criaturas desde creatures.json a través de cualquier webview activo o del estado
+  window.ensureCreaturesBaseStats = async function() {
+    if (window.__creaturesBases && Object.keys(window.__creaturesBases).length > 0) {
+      return window.__creaturesBases;
+    }
     const state = typeof window.pgGetState === 'function' ? window.pgGetState() : {};
-    const bases = state.basesByName || window.basesByName || {};
-    const moves = state.movesByName || window.movesByName || {};
-    const b = bases[sp];
+    if (state.basesByName && Object.keys(state.basesByName).length > 0) {
+      window.__creaturesBases = state.basesByName;
+      return window.__creaturesBases;
+    }
+    if (window.basesByName && Object.keys(window.basesByName).length > 0) {
+      window.__creaturesBases = window.basesByName;
+      return window.__creaturesBases;
+    }
 
-    // Proyectar estadísticas reales usando PokeGridIvMath si no venían en el objeto
-    if ((!stats || !stats.hp) && b && window.PokeGridIvMath) {
+    const webviews = Array.from(document.querySelectorAll('webview'));
+    for (const wv of webviews) {
       try {
-        const proj = window.PokeGridIvMath.projectPokemon({
-          level: pk.level,
-          quality: pk.quality || 1,
-          ivTotal: pk.ivTotal != null ? pk.ivTotal : 96,
-          species: { baseStats: { hp: b[0], atk: b[1], def: b[2], spa: b[3], spd: b[4], speed: b[5] } }
-        }, pk.level);
-        if (proj && proj.stats) {
-          stats = {
-            hp: Math.round(proj.stats.hp),
-            atk: Math.round(proj.stats.atk),
-            def: Math.round(proj.stats.def),
-            spa: Math.round(proj.stats.spa),
-            spd: Math.round(proj.stats.spd),
-            vel: Math.round(proj.stats.speed)
-          };
-          if (!power) power = proj.power;
+        const bs = await wv.executeJavaScript(`(async () => {
+          try {
+            if (window.__pgCreaturesBs) return window.__pgCreaturesBs;
+            const r = await fetch('/game/creatures.json');
+            const data = await r.json();
+            const bs = {};
+            ((data && data.creatures) || []).forEach(c => {
+              if (c && c.name) {
+                const k = String(c.name).toLowerCase();
+                if (bs[k] && !c.area && +c.pokeId >= 10000) return;
+                bs[k] = [+c.baseHp || 0, +c.baseAtk || 0, +c.baseDef || 0, +c.baseSpAtk || 0, +c.baseSpDef || 0, +c.baseSpeed || 0];
+              }
+            });
+            window.__pgCreaturesBs = bs;
+            return bs;
+          } catch (e) {
+            return null;
+          }
+        })()`);
+        if (bs && Object.keys(bs).length > 0) {
+          window.__creaturesBases = bs;
+          if (typeof window.basesByName === 'undefined' || !Object.keys(window.basesByName || {}).length) {
+            window.basesByName = bs;
+          }
+          return bs;
         }
       } catch (e) {}
     }
+    return window.__creaturesBases || {};
+  };
 
-    if (!stats || !stats.hp) {
-      stats = { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, vel: 100 };
-    }
-
-    const tipos = (pk.type1 ? [pk.type1, pk.type2].filter(Boolean) : (moves[sp] && moves[sp].t) || []).map(x => String(x).toUpperCase());
-
-    const payload = {
-      nome: pk.name,
-      shiny: !!pk.shiny,
-      ditto: !!pk.isDitto,
-      ativo: false,
-      time: !!pk.team,
-      tipos,
-      nivel: pk.level,
-      qualidade: pk.quality || 1,
-      ivTotal: pk.ivTotal != null ? pk.ivTotal : 96,
-      stats,
-      poder: power || 0,
-      fonte: 'tooltip'
+  // Definición o polyfill de pgOpenIv en el contexto global
+  if (typeof window.pgOpenIv !== 'function') {
+    window.pgOpenIv = function(payload, accIdx) {
+      const lockBtn = document.querySelector('#ivCard button[data-a="trava"].on');
+      if (lockBtn) lockBtn.click();
+      if (typeof window.ivRecebe === 'function') {
+        window.ivRecebe(accIdx != null ? accIdx : 0, payload);
+      }
+      const ivCard = document.getElementById('ivCard');
+      if (ivCard && !ivCard.classList.contains('show')) {
+        const ivsBtn = document.getElementById('ivsBtn');
+        if (ivsBtn) ivsBtn.click();
+      } else if (typeof window.ivRender === 'function') {
+        window.ivRender();
+      }
     };
+  }
 
-    // 1. Usar el bridge nativo expuesto en index.html si está disponible
-    if (typeof window.pgOpenIv === 'function') {
-      window.pgOpenIv(payload, accIdx);
-      return;
-    }
+  // Abrir #ivCard con ese Pokémon seleccionado
+  window.openPokemonIv = async function(pk, accIdx) {
+    if (!pk) return;
+    try {
+      const bases = await window.ensureCreaturesBaseStats();
+      const sp = String(pk.name || '').toLowerCase().trim();
+      const b = (bases && bases[sp]) || (window.basesByName && window.basesByName[sp]);
 
-    // 2. Fallback: inyectar a través de console-message del webview
-    const webviews = state.webviews || Array.from(document.querySelectorAll('webview'));
-    const targetWv = webviews[accIdx] || webviews[0];
-    if (targetWv) {
-      try {
-        targetWv.executeJavaScript("console.log('__PGIV__" + JSON.stringify(payload).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "')").catch(() => {});
-      } catch (e) {}
-    }
+      let stats = pk.stats;
+      let power = pk.power;
+      const lvl = Math.max(1, Math.min(9999, Math.round(+pk.level || 1)));
+      const qual = +pk.quality > 0 ? +pk.quality : 1;
+      const ivTot = pk.ivTotal != null ? Math.max(0, Math.min(192, Math.round(+pk.ivTotal))) : null;
 
-    // Asegurar que #ivCard se muestre
-    const ivCard = document.getElementById('ivCard');
-    if (ivCard && !ivCard.classList.contains('show')) {
-      const ivsBtn = document.getElementById('ivsBtn');
-      if (ivsBtn) ivsBtn.click();
+      // Proyectar estadísticas reales usando PokeGridIvMath si no venían en el objeto
+      if ((!stats || !stats.hp) && b && window.PokeGridIvMath) {
+        try {
+          const proj = window.PokeGridIvMath.projectPokemon({
+            level: lvl,
+            quality: qual,
+            ivTotal: ivTot != null ? ivTot : 96,
+            species: {
+              baseStats: {
+                hp: b[0],
+                atk: b[1],
+                def: b[2],
+                spa: b[3],
+                spd: b[4],
+                speed: b[5]
+              }
+            }
+          }, lvl);
+          if (proj && proj.stats) {
+            stats = {
+              hp: Math.round(proj.stats.hp),
+              atk: Math.round(proj.stats.atk),
+              def: Math.round(proj.stats.def),
+              spa: Math.round(proj.stats.spa),
+              spd: Math.round(proj.stats.spd),
+              vel: Math.round(proj.stats.speed)
+            };
+            if (!power) power = proj.power;
+          }
+        } catch (e) {}
+      }
+
+      if (!stats || !stats.hp) {
+        const fallbackVal = Math.round(100 + (lvl * 15));
+        stats = {
+          hp: fallbackVal,
+          atk: fallbackVal,
+          def: fallbackVal,
+          spa: fallbackVal,
+          spd: fallbackVal,
+          vel: fallbackVal
+        };
+      }
+
+      const state = typeof window.pgGetState === 'function' ? window.pgGetState() : {};
+      const moves = state.movesByName || window.movesByName || {};
+      const rawTipos = pk.type1
+        ? [pk.type1, pk.type2].filter(Boolean)
+        : (moves[sp] && moves[sp].t) || [];
+      const tipos = rawTipos
+        .map(x => String(x).toUpperCase())
+        .filter(x => Object.hasOwn(TIPO_COR, x.toLowerCase()))
+        .slice(0, 2);
+
+      const saneStats = {
+        hp: Math.max(0, Math.min(1000000, Math.round(+stats.hp || 0))),
+        atk: Math.max(0, Math.min(1000000, Math.round(+stats.atk || 0))),
+        def: Math.max(0, Math.min(1000000, Math.round(+stats.def || 0))),
+        spa: Math.max(0, Math.min(1000000, Math.round(+stats.spa || 0))),
+        spd: Math.max(0, Math.min(1000000, Math.round(+stats.spd || 0))),
+        vel: Math.max(0, Math.min(1000000, Math.round(+(stats.vel != null ? stats.vel : stats.speed) || 0)))
+      };
+
+      const payload = {
+        nome: String(pk.name || '').trim(),
+        shiny: !!pk.shiny,
+        ditto: !!pk.isDitto,
+        ativo: false,
+        time: !!pk.team,
+        tipos,
+        nivel: lvl,
+        qualidade: qual,
+        ivTotal: ivTot,
+        stats: saneStats,
+        poder: Math.max(0, Math.min(1000000000, Math.round(+power || 0))),
+        fonte: 'tooltip'
+      };
+
+      // Si la card de IVs estaba bloqueada con el candado, desbloquear
+      const lockBtn = document.querySelector('#ivCard button[data-a="trava"].on');
+      if (lockBtn) lockBtn.click();
+
+      // Limpiar búsqueda en card de IV si la hubiera
+      const ivBusca = document.getElementById('ivBusca');
+      if (ivBusca && ivBusca.value) {
+        ivBusca.value = '';
+        ivBusca.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      const acc = accIdx != null ? accIdx : 0;
+
+      // 1. Invocar pgOpenIv (o el polyfill definido arriba)
+      if (typeof window.pgOpenIv === 'function') {
+        window.pgOpenIv(payload, acc);
+      } else if (typeof window.ivRecebe === 'function') {
+        // 2. Invocar directamente ivRecebe nativo en el renderer
+        window.ivRecebe(acc, payload);
+        const ivCard = document.getElementById('ivCard');
+        if (ivCard && !ivCard.classList.contains('show')) {
+          const ivsBtn = document.getElementById('ivsBtn');
+          if (ivsBtn) ivsBtn.click();
+        } else if (typeof window.ivRender === 'function') {
+          window.ivRender();
+        }
+      }
+
+      // Asegurar pestaña de leitor activa
+      setTimeout(() => {
+        const leitorTab = document.querySelector('#ivCard .iv-aba[data-v="leitor"]:not(.on)');
+        if (leitorTab) leitorTab.click();
+      }, 30);
+    } catch (err) {
+      console.error('Error al abrir IV de Pokémon:', err);
     }
   };
 

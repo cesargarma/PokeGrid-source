@@ -5974,13 +5974,19 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
   }, true);
   ivsBtn.onclick = () => { ivAberto = !ivAberto; ivRender(); };
   window.pgOpenIv = (payload, accIdx) => {
+    const lockBtn = document.querySelector('#ivCard button[data-a="trava"].on');
+    if (lockBtn) lockBtn.click();
     ivAberto = true;
     ivRecebe(accIdx != null ? accIdx : -1, payload);
     ivRender();
+    const leitorTab = document.querySelector('#ivCard .iv-aba[data-v="leitor"]:not(.on)');
+    if (leitorTab) leitorTab.click();
   };
   window.pgGetState = () => ({
     webviews, off, stCache, tabNames, ACOR, basesByName, movesByName, carregaHunts, t, ico, esc, nf, decL
   });
+  window.basesByName = basesByName;
+  window.movesByName = movesByName;
 
   // ----- Atalhos de teclado (letra solta) pros botoes principais (PR do israeltduarte) -----
   // So responde com o foco na interface: com o jogo focado o keydown nem chega aqui (contexto
