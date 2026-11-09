@@ -5973,6 +5973,14 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     w.outerHTML = ivSprHtml({ nome: w.dataset.n, shiny: w.dataset.s === '1', ditto: w.dataset.d === '1' }, +w.dataset.px || 28);
   }, true);
   ivsBtn.onclick = () => { ivAberto = !ivAberto; ivRender(); };
+  window.pgOpenIv = (payload, accIdx) => {
+    ivAberto = true;
+    ivRecebe(accIdx != null ? accIdx : -1, payload);
+    ivRender();
+  };
+  window.pgGetState = () => ({
+    webviews, off, stCache, tabNames, ACOR, basesByName, movesByName, carregaHunts, t, ico, esc, nf, decL
+  });
 
   // ----- Atalhos de teclado (letra solta) pros botoes principais (PR do israeltduarte) -----
   // So responde com o foco na interface: com o jogo focado o keydown nem chega aqui (contexto

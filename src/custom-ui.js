@@ -61,6 +61,444 @@
       color: var(--mut);
       white-space: nowrap;
     }
+
+    /* Modal y Vista de Pokémon Lv 300+ */
+    #pokesOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 800;
+      padding: 16px;
+    }
+    #pokesOverlay.show {
+      display: flex;
+    }
+    #pokesModal {
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 12px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+      width: 960px;
+      max-width: 96vw;
+      height: 85vh;
+      max-height: 850px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .pk-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--bd2, #30363d);
+      background: var(--sf2, #1c2128);
+      user-select: none;
+    }
+    .pk-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pk-title h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pk-badge-lv {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(242, 198, 101, 0.15);
+      border: 1px solid rgba(242, 198, 101, 0.35);
+      color: var(--gold, #f2c665);
+    }
+    .pk-badge-count {
+      font-size: 11.5px;
+      color: var(--mut, #8b949e);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .pk-hd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pk-hd-actions button {
+      background: transparent;
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--mut, #8b949e);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .pk-hd-actions button:hover {
+      background: var(--bd, #21262d);
+      color: var(--tx, #e6edf3);
+      border-color: var(--tx2, #8b949e);
+    }
+    .pk-close-btn {
+      font-size: 14px !important;
+      padding: 4px 9px !important;
+    }
+    .pk-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px 18px;
+      background: var(--bg, #0d1117);
+      border-bottom: 1px solid var(--bd2, #30363d);
+      font-size: 12px;
+    }
+    .pk-search-box {
+      position: relative;
+      flex: 1;
+      min-width: 180px;
+      max-width: 300px;
+    }
+    .pk-search-box svg {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--mut, #8b949e);
+      pointer-events: none;
+    }
+    .pk-search-box input {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      padding: 5px 10px 5px 30px;
+      color: var(--tx, #e6edf3);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pk-search-box input:focus {
+      border-color: #388bfd;
+      box-shadow: 0 0 0 2px rgba(56, 139, 253, 0.25);
+    }
+    .pk-trainer-chips {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .pk-chip {
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+    .pk-chip:hover {
+      background: var(--bd, #21262d);
+      color: var(--tx, #e6edf3);
+    }
+    .pk-chip.on {
+      background: var(--tx, #e6edf3);
+      color: var(--bg, #0d1117);
+      border-color: var(--tx, #e6edf3);
+    }
+    .pk-chip.on .pk-chip-dot {
+      box-shadow: 0 0 0 1px var(--bg, #0d1117);
+    }
+    .pk-chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pk-shiny-btn {
+      background: var(--sf, #161b22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .pk-shiny-btn:hover {
+      color: #f778ba;
+      border-color: #f778ba;
+    }
+    .pk-shiny-btn.on {
+      background: rgba(247, 120, 186, 0.15);
+      border-color: #f778ba;
+      color: #f778ba;
+      font-weight: 700;
+    }
+    .pk-counts {
+      margin-left: auto;
+      font-size: 11.5px;
+      color: var(--mut, #8b949e);
+      white-space: nowrap;
+    }
+    .pk-table-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: auto;
+      position: relative;
+    }
+    .pk-table-container::-webkit-scrollbar {
+      width: 9px;
+      height: 9px;
+    }
+    .pk-table-container::-webkit-scrollbar-thumb {
+      background: var(--bd2, #30363d);
+      border-radius: 5px;
+    }
+    .pk-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+    .pk-table thead {
+      position: sticky;
+      top: 0;
+      background: var(--sf2, #1c2128);
+      z-index: 5;
+      box-shadow: 0 1px 0 var(--bd2, #30363d);
+    }
+    .pk-table th {
+      padding: 9px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--mut, #8b949e);
+      user-select: none;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--bd2, #30363d);
+      transition: color 0.12s ease;
+    }
+    .pk-table th:hover {
+      color: var(--tx, #e6edf3);
+    }
+    .pk-table th.active-sort {
+      color: var(--gold, #f2c665);
+    }
+    .pk-sort-arrow {
+      display: inline-block;
+      margin-left: 3px;
+      font-size: 11px;
+    }
+    .pk-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(48, 54, 61, 0.45);
+      vertical-align: middle;
+      color: var(--tx, #e6edf3);
+    }
+    .pk-row {
+      cursor: pointer;
+      transition: background 0.1s ease;
+    }
+    .pk-row:hover {
+      background: rgba(56, 139, 253, 0.08);
+    }
+    .pk-row:hover td {
+      color: #fff;
+    }
+    .pk-cell-trainer {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .pk-cell-poke {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pk-sprite-wrap {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .pk-sprite-wrap img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+      object-fit: contain;
+    }
+    .pk-poke-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .pk-poke-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pk-poke-name {
+      font-weight: 700;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pk-shiny-badge {
+      font-size: 11px;
+      color: var(--gold, #f2c665);
+      filter: drop-shadow(0 0 3px rgba(242, 198, 101, 0.6));
+    }
+    .pk-team-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(88, 166, 255, 0.15);
+      color: #58a6ff;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+    .pk-types-row {
+      display: flex;
+      gap: 4px;
+    }
+    .pk-type-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .pk-lv-badge {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--tx, #e6edf3);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pk-iv-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pk-iv-text {
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .pk-iv-bar {
+      height: 4px;
+      width: 70px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .pk-iv-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+    .pk-qual-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pk-qual-num {
+      font-weight: 700;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .pk-qual-raro {
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .pk-pw-cell {
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--tx, #e6edf3);
+      font-variant-numeric: tabular-nums;
+    }
+    .pk-btn-ver {
+      background: transparent;
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 6px;
+      color: var(--mut, #8b949e);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .pk-row:hover .pk-btn-ver {
+      background: #388bfd;
+      border-color: #388bfd;
+      color: #fff;
+    }
+    .pk-state-msg {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--mut, #8b949e);
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .pk-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--bd2, #30363d);
+      border-top-color: var(--gold, #f2c665);
+      border-radius: 50%;
+      animation: pkSpin 0.75s linear infinite;
+    }
+    @keyframes pkSpin {
+      to { transform: rotate(360deg); }
+    }
   `);
 
   // Card Consumibles (Pokéballs, Potions, Divisas)
@@ -319,15 +757,631 @@
     }
   };
 
-  // Ejecución inicial y observación de cambios en el contenedor de cards
+  // =========================================================================
+  // VISTA Y MODAL DE POKÉMON LV 300+ DE TODAS LAS CUENTAS
+  // =========================================================================
+  window.__pokes300Data = window.__pokes300Data || [];
+  let pokesSortKey = 'level';
+  let pokesSortAsc = false;
+  let pokesTrainerFilter = 'all';
+  let pokesSearchText = '';
+  let pokesShinyOnly = false;
+  let pokesIsLoading = false;
+
+  const TIPO_COR = {
+    normal:'#a8a878', fire:'#f08030', water:'#6890f0', electric:'#f8d030', grass:'#78c850', ice:'#98d8d8',
+    fighting:'#c03028', poison:'#a040a0', ground:'#e0c068', flying:'#a890f0', psychic:'#f85888', bug:'#a8b820',
+    rock:'#b8a038', ghost:'#705898', dragon:'#7038f8', dark:'#705848', steel:'#b8b8d0', fairy:'#ee99ac'
+  };
+
+  const RARO_INFO = (q) => {
+    return q >= 4 ? ['Divina', '#dbefff'] :
+           q >= 3 ? ['Anciã', '#b8860b'] :
+           q >= 2 ? ['Mítica', '#a77bea'] :
+           q >= 1.7 ? ['Lendária', '#ff8c3c'] :
+           q >= 1.5 ? ['Épica', '#f0c040'] :
+           q >= 1.3 ? ['Rara', '#b06cff'] :
+           q >= 1.1 ? ['Incomum', '#7fd4ff'] :
+           q >= 1 ? ['Comum', '#63d873'] : ['Fraca', '#9aa6b3'];
+  };
+
+  const POT_COR = (pct) => {
+    return pct >= 90 ? '#f2c665' : pct >= 75 ? '#3fb950' : pct >= 55 ? '#79c0ff' : pct >= 35 ? '#8b949e' : '#f85149';
+  };
+
+  const POKES_LV300_QUERY = `(() => {
+    try {
+      const P = window.__poke;
+      if (!P || !P.ws) return { ok: false, error: 'no_poke' };
+      const pokes = (P.ws.pokes && Array.isArray(P.ws.pokes.list)) ? P.ws.pokes.list : [];
+      const ch = (P.api && P.api['/api/characters/me'] && P.api['/api/characters/me'].character) || {};
+      const tName = ch.name || '';
+      const res = [];
+      for (const p of pokes) {
+        if (!p) continue;
+        const lv = +p.level || 0;
+        if (lv >= 300) {
+          res.push({
+            id: p.id != null ? String(p.id) : '',
+            name: p.name || '?',
+            level: lv,
+            shiny: !!p.shiny,
+            quality: +(+p.quality || 1).toFixed(2),
+            ivTotal: p.ivTotal != null ? Math.round(+p.ivTotal) : null,
+            power: +p.power || 0,
+            team: !!p.team,
+            slot: p.slot != null ? p.slot : null,
+            leader: !!p.leader,
+            speciesId: +p.speciesId || +p.pokeId || 0,
+            type1: p.type1 ? String(p.type1).toUpperCase() : '',
+            type2: p.type2 ? String(p.type2).toUpperCase() : '',
+            isDitto: !!p.isDitto,
+            stats: p.stats || (p.hp != null && p.atk != null ? { hp: +p.hp, atk: +p.atk, def: +p.def, spa: +p.spa, spd: +p.spd, vel: +p.speed || +p.vel } : null)
+          });
+        }
+      }
+      return { ok: true, name: tName, list: res };
+    } catch (err) {
+      return { ok: false, error: String(err) };
+    }
+  })()`;
+
+  // Construir o inyectar modal en el DOM
+  window.initPokesModal = function() {
+    let ov = document.getElementById('pokesOverlay');
+    if (ov) return ov;
+
+    ov = document.createElement('div');
+    ov.id = 'pokesOverlay';
+    ov.innerHTML = `
+      <div id="pokesModal">
+        <div class="pk-hd">
+          <div class="pk-title">
+            <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:var(--gold,#f2c665)">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M2 12h20"/>
+              <circle cx="12" cy="12" r="3.5" fill="var(--sf2,#1c2128)"/>
+            </svg>
+            <h2>Pokémon <span class="pk-badge-lv">Nv 300+</span></h2>
+            <span class="pk-badge-count" id="pkTotalCount">0 encontrados</span>
+          </div>
+          <div class="pk-hd-actions">
+            <button id="pkRefreshBtn" title="Actualizar lista">↻ Actualizar</button>
+            <button id="pkCloseBtn" class="pk-close-btn" title="Cerrar (Esc)">✕</button>
+          </div>
+        </div>
+
+        <div class="pk-toolbar">
+          <div class="pk-search-box">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M11.5 7a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0zm-.82 4.74a6 6 0 1 0-1.06 1.06l3.79 3.79a.75.75 0 1 0 1.06-1.06l-3.79-3.79z"/>
+            </svg>
+            <input type="search" id="pkSearchInput" placeholder="Buscar por nombre o tipo..." autocomplete="off" spellcheck="false">
+          </div>
+          <div class="pk-trainer-chips" id="pkTrainerChips"></div>
+          <button id="pkShinyFilter" class="pk-shiny-btn" title="Filtrar solo shiny">✨ Shiny</button>
+          <span class="pk-counts" id="pkFilteredCount">Mostrando 0</span>
+        </div>
+
+        <div class="pk-table-container">
+          <table class="pk-table" id="pkTable">
+            <thead>
+              <tr>
+                <th data-sort="trainer" style="width:17%">Entrenador <span class="pk-sort-arrow"></span></th>
+                <th data-sort="name" style="width:27%">Pokémon <span class="pk-sort-arrow"></span></th>
+                <th data-sort="level" style="width:11%">Nivel <span class="pk-sort-arrow"></span></th>
+                <th data-sort="ivTotal" style="width:16%">IVs <span class="pk-sort-arrow"></span></th>
+                <th data-sort="quality" style="width:13%">Calidad <span class="pk-sort-arrow"></span></th>
+                <th data-sort="power" style="width:16%">Poder <span class="pk-sort-arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="pkTableBody"></tbody>
+          </table>
+          <div id="pkLoading" class="pk-state-msg" style="display:none">
+            <span class="pk-spinner"></span>
+            <span>Cargando Pokémon de todas las cuentas...</span>
+          </div>
+          <div id="pkEmpty" class="pk-state-msg" style="display:none">
+            <span>No se encontraron Pokémon de nivel 300+ con los filtros actuales.</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(ov);
+
+    // Eventos
+    const closeBtn = ov.querySelector('#pkCloseBtn');
+    if (closeBtn) closeBtn.onclick = () => window.closePokesModal();
+
+    const refreshBtn = ov.querySelector('#pkRefreshBtn');
+    if (refreshBtn) refreshBtn.onclick = () => window.fetchPokes300(true);
+
+    ov.onclick = (e) => {
+      if (e.target === ov) window.closePokesModal();
+    };
+
+    const searchInput = ov.querySelector('#pkSearchInput');
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        pokesSearchText = (e.target.value || '').trim().toLowerCase();
+        window.renderPokesTable();
+      };
+    }
+
+    const shinyBtn = ov.querySelector('#pkShinyFilter');
+    if (shinyBtn) {
+      shinyBtn.onclick = () => {
+        pokesShinyOnly = !pokesShinyOnly;
+        shinyBtn.classList.toggle('on', pokesShinyOnly);
+        window.renderPokesTable();
+      };
+    }
+
+    // Cabeceras de tabla ordenables
+    ov.querySelectorAll('th[data-sort]').forEach(th => {
+      th.onclick = () => {
+        const key = th.dataset.sort;
+        if (pokesSortKey === key) {
+          pokesSortAsc = !pokesSortAsc;
+        } else {
+          pokesSortKey = key;
+          pokesSortAsc = (key === 'trainer' || key === 'name');
+        }
+        window.renderPokesTable();
+      };
+    });
+
+    return ov;
+  };
+
+  // Abrir y cerrar modal
+  window.openPokesModal = function() {
+    const ov = window.initPokesModal();
+    ov.classList.add('show');
+    const pokesBtn = document.getElementById('pokesBtn');
+    if (pokesBtn) pokesBtn.classList.add('on');
+    window.fetchPokes300();
+  };
+
+  window.closePokesModal = function() {
+    const ov = document.getElementById('pokesOverlay');
+    if (ov) ov.classList.remove('show');
+    const pokesBtn = document.getElementById('pokesBtn');
+    if (pokesBtn) pokesBtn.classList.remove('on');
+  };
+
+  // Consultar todas las cuentas conectadas
+  window.fetchPokes300 = async function(force = false) {
+    if (pokesIsLoading) return;
+    pokesIsLoading = true;
+
+    const ov = window.initPokesModal();
+    const loadingEl = ov.querySelector('#pkLoading');
+    const emptyEl = ov.querySelector('#pkEmpty');
+    const tbody = ov.querySelector('#pkTableBody');
+
+    if (!window.__pokes300Data.length || force) {
+      if (loadingEl) loadingEl.style.display = 'flex';
+      if (emptyEl) emptyEl.style.display = 'none';
+      if (tbody && !window.__pokes300Data.length) tbody.innerHTML = '';
+    }
+
+    // Obtener información del estado global de PokeGrid
+    const state = typeof window.pgGetState === 'function' ? window.pgGetState() : {};
+    const webviews = state.webviews || Array.from(document.querySelectorAll('webview'));
+    const off = state.off || [false, false, false, false];
+    const stCache = state.stCache || {};
+    const tabNames = state.tabNames || [];
+    const ACOR = state.ACOR || ['#c07bf5', '#3987e5', '#1baf7a', '#eda100'];
+
+    const allPokes = [];
+    const activeTrainers = [];
+
+    const promises = webviews.map(async (wv, idx) => {
+      if (!wv || off[idx]) return null;
+      const dot = ACOR[idx] || '#8b949e';
+      const fallbackName = tabNames[idx] || (stCache[idx] && stCache[idx].d && stCache[idx].d.name) || ('C' + (idx + 1));
+
+      try {
+        const res = await wv.executeJavaScript(POKES_LV300_QUERY);
+        const trainerName = (res && res.name) || fallbackName;
+        activeTrainers.push({ idx, name: trainerName, dot });
+
+        if (res && res.ok && Array.isArray(res.list)) {
+          res.list.forEach(pk => {
+            allPokes.push({
+              accIdx: idx,
+              trainerName,
+              dotColor: dot,
+              ...pk
+            });
+          });
+        }
+      } catch (e) {
+        activeTrainers.push({ idx, name: fallbackName, dot });
+      }
+
+      // Si el webview no devolvió lista pero hay equipo en stCache con nivel >= 300, incluirlo
+      const team = (stCache[idx] && stCache[idx].d && Array.isArray(stCache[idx].d.team)) ? stCache[idx].d.team : [];
+      team.forEach(tp => {
+        if (tp && +tp.level >= 300) {
+          const already = allPokes.some(x => x.accIdx === idx && (x.id === tp.id || (x.name === tp.name && x.level === tp.level)));
+          if (!already) {
+            allPokes.push({
+              accIdx: idx,
+              trainerName: fallbackName,
+              dotColor: dot,
+              id: tp.id || '',
+              name: tp.name || '?',
+              level: +tp.level,
+              shiny: !!tp.shiny,
+              quality: +(+tp.q || 1).toFixed(2),
+              ivTotal: tp.ivt != null ? Math.round(+tp.ivt) : null,
+              power: +tp.pw || 0,
+              team: true,
+              slot: tp.slot != null ? tp.slot : null,
+              leader: !!tp.ld,
+              speciesId: +tp.sid || 0,
+              type1: tp.t1 ? String(tp.t1).toUpperCase() : '',
+              type2: tp.t2 ? String(tp.t2).toUpperCase() : '',
+              isDitto: !!tp.dt,
+              stats: null
+            });
+          }
+        }
+      });
+    });
+
+    try {
+      await Promise.all(promises);
+      window.__pokes300Data = allPokes;
+      window.__pokesTrainers = activeTrainers.sort((a, b) => a.idx - b.idx);
+    } catch {}
+
+    pokesIsLoading = false;
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    window.updateTrainerChips();
+    window.renderPokesTable();
+  };
+
+  // Actualizar chips de entrenadores
+  window.updateTrainerChips = function() {
+    const ov = document.getElementById('pokesOverlay');
+    if (!ov) return;
+    const container = ov.querySelector('#pkTrainerChips');
+    if (!container) return;
+
+    const trainers = window.__pokesTrainers || [];
+    let html = '<button class="pk-chip' + (pokesTrainerFilter === 'all' ? ' on' : '') + '" data-acc="all">Todos</button>';
+
+    trainers.forEach(tr => {
+      const isSel = pokesTrainerFilter === String(tr.idx);
+      html += '<button class="pk-chip' + (isSel ? ' on' : '') + '" data-acc="' + tr.idx + '">'
+        + '<span class="pk-chip-dot" style="background:' + tr.dot + '"></span>'
+        + '<span>' + (tr.name || ('C' + (tr.idx + 1))) + '</span>'
+        + '</button>';
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.pk-chip').forEach(chip => {
+      chip.onclick = () => {
+        pokesTrainerFilter = chip.dataset.acc;
+        window.updateTrainerChips();
+        window.renderPokesTable();
+      };
+    });
+  };
+
+  // Renderizar la tabla con filtros y ordenación
+  window.renderPokesTable = function() {
+    const ov = document.getElementById('pokesOverlay');
+    if (!ov) return;
+
+    const tbody = ov.querySelector('#pkTableBody');
+    const totalCountEl = ov.querySelector('#pkTotalCount');
+    const filteredCountEl = ov.querySelector('#pkFilteredCount');
+    const emptyEl = ov.querySelector('#pkEmpty');
+    const loadingEl = ov.querySelector('#pkLoading');
+
+    if (!tbody) return;
+
+    const list = window.__pokes300Data || [];
+    if (totalCountEl) totalCountEl.textContent = list.length + ' encontrados';
+
+    // Filtrar
+    const filtered = list.filter(pk => {
+      if (pokesTrainerFilter !== 'all' && String(pk.accIdx) !== pokesTrainerFilter) return false;
+      if (pokesShinyOnly && !pk.shiny) return false;
+      if (pokesSearchText) {
+        const nm = String(pk.name || '').toLowerCase();
+        const t1 = String(pk.type1 || '').toLowerCase();
+        const t2 = String(pk.type2 || '').toLowerCase();
+        if (!nm.includes(pokesSearchText) && !t1.includes(pokesSearchText) && !t2.includes(pokesSearchText)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    // Ordenar
+    filtered.sort((a, b) => {
+      let va = a[pokesSortKey];
+      let vb = b[pokesSortKey];
+
+      if (pokesSortKey === 'trainer') {
+        va = (a.trainerName || '') + a.accIdx;
+        vb = (b.trainerName || '') + b.accIdx;
+      } else if (pokesSortKey === 'name') {
+        va = String(a.name || '').toLowerCase();
+        vb = String(b.name || '').toLowerCase();
+      } else {
+        va = va != null ? +va : -Infinity;
+        vb = vb != null ? +vb : -Infinity;
+      }
+
+      if (va < vb) return pokesSortAsc ? -1 : 1;
+      if (va > vb) return pokesSortAsc ? 1 : -1;
+      return (b.level || 0) - (a.level || 0);
+    });
+
+    // Actualizar indicadores de cabecera
+    ov.querySelectorAll('th[data-sort]').forEach(th => {
+      const isAct = th.dataset.sort === pokesSortKey;
+      th.classList.toggle('active-sort', isAct);
+      const arrow = th.querySelector('.pk-sort-arrow');
+      if (arrow) {
+        arrow.textContent = isAct ? (pokesSortAsc ? '▲' : '▼') : '';
+      }
+    });
+
+    if (filteredCountEl) {
+      filteredCountEl.textContent = 'Mostrando ' + filtered.length + ' de ' + list.length;
+    }
+
+    if (!filtered.length) {
+      tbody.innerHTML = '';
+      if (emptyEl && (!loadingEl || loadingEl.style.display === 'none')) {
+        emptyEl.style.display = 'flex';
+      }
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    // Generar filas
+    tbody.innerHTML = filtered.map((pk, idx) => {
+      const spriteUrl = pk.speciesId ? ('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + (pk.shiny ? 'shiny/' : '') + pk.speciesId + '.png') : '';
+      const fallbackSvg = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5"/></svg>';
+      const spriteImg = spriteUrl ? ('<img src="' + spriteUrl + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span style="display:none">' + fallbackSvg + '</span>') : fallbackSvg;
+
+      const typesHtml = [pk.type1, pk.type2].filter(Boolean).map(ty => {
+        const bg = TIPO_COR[ty.toLowerCase()] || '#6e7681';
+        return '<span class="pk-type-pill" style="background:' + bg + '">' + ty + '</span>';
+      }).join('');
+
+      const raro = RARO_INFO(pk.quality || 1);
+      const ivPct = pk.ivTotal != null ? Math.round((pk.ivTotal / 192) * 100) : null;
+      const ivColor = ivPct != null ? POT_COR(ivPct) : '#8b949e';
+
+      const nf = (n) => (n == null ? '–' : Math.round(n).toLocaleString('pt-BR'));
+
+      return `
+        <tr class="pk-row" data-pk-idx="${idx}">
+          <td>
+            <div class="pk-cell-trainer">
+              <span class="pk-chip-dot" style="background:${pk.dotColor}"></span>
+              <span>${pk.trainerName}</span>
+            </div>
+          </td>
+          <td>
+            <div class="pk-cell-poke">
+              <div class="pk-sprite-wrap">${spriteImg}</div>
+              <div class="pk-poke-info">
+                <div class="pk-poke-name-row">
+                  <span class="pk-poke-name">${pk.name}</span>
+                  ${pk.shiny ? '<span class="pk-shiny-badge" title="Shiny">✨</span>' : ''}
+                  ${pk.team ? '<span class="pk-team-badge">Equipo</span>' : ''}
+                </div>
+                <div class="pk-types-row">${typesHtml}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="pk-lv-badge">Nv. ${pk.level}</span>
+          </td>
+          <td>
+            <div class="pk-iv-cell">
+              <div class="pk-iv-text" style="color:${ivColor}">
+                <span>${pk.ivTotal != null ? pk.ivTotal + '/192' : '?/192'}</span>
+                ${ivPct != null ? '<span style="font-size:11px;opacity:.9">(' + ivPct + '%)</span>' : ''}
+              </div>
+              ${ivPct != null ? '<div class="pk-iv-bar"><div class="pk-iv-bar-fill" style="width:' + ivPct + '%;background:' + ivColor + '"></div></div>' : ''}
+            </div>
+          </td>
+          <td>
+            <div class="pk-qual-cell">
+              <span class="pk-qual-num" style="color:${raro[1]}">×${(+pk.quality || 1).toFixed(2)}</span>
+              <span class="pk-qual-raro" style="color:${raro[1]}">${raro[0]}</span>
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <span class="pk-pw-cell">${pk.power ? nf(pk.power) : '–'}</span>
+              <button class="pk-btn-ver">Ver IVs</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // Asignar clic para abrir el modal de IVs
+    tbody.querySelectorAll('.pk-row').forEach(row => {
+      row.onclick = () => {
+        const pkIdx = +row.dataset.pkIdx;
+        const pk = filtered[pkIdx];
+        if (pk) {
+          window.openPokemonIv(pk, pk.accIdx);
+        }
+      };
+    });
+  };
+
+  // Abrir #ivCard con ese Pokémon seleccionado
+  window.openPokemonIv = function(pk, accIdx) {
+    let stats = pk.stats;
+    let power = pk.power;
+    const sp = String(pk.name || '').toLowerCase();
+
+    const state = typeof window.pgGetState === 'function' ? window.pgGetState() : {};
+    const bases = state.basesByName || window.basesByName || {};
+    const moves = state.movesByName || window.movesByName || {};
+    const b = bases[sp];
+
+    // Proyectar estadísticas reales usando PokeGridIvMath si no venían en el objeto
+    if ((!stats || !stats.hp) && b && window.PokeGridIvMath) {
+      try {
+        const proj = window.PokeGridIvMath.projectPokemon({
+          level: pk.level,
+          quality: pk.quality || 1,
+          ivTotal: pk.ivTotal != null ? pk.ivTotal : 96,
+          species: { baseStats: { hp: b[0], atk: b[1], def: b[2], spa: b[3], spd: b[4], speed: b[5] } }
+        }, pk.level);
+        if (proj && proj.stats) {
+          stats = {
+            hp: Math.round(proj.stats.hp),
+            atk: Math.round(proj.stats.atk),
+            def: Math.round(proj.stats.def),
+            spa: Math.round(proj.stats.spa),
+            spd: Math.round(proj.stats.spd),
+            vel: Math.round(proj.stats.speed)
+          };
+          if (!power) power = proj.power;
+        }
+      } catch (e) {}
+    }
+
+    if (!stats || !stats.hp) {
+      stats = { hp: 100, atk: 100, def: 100, spa: 100, spd: 100, vel: 100 };
+    }
+
+    const tipos = (pk.type1 ? [pk.type1, pk.type2].filter(Boolean) : (moves[sp] && moves[sp].t) || []).map(x => String(x).toUpperCase());
+
+    const payload = {
+      nome: pk.name,
+      shiny: !!pk.shiny,
+      ditto: !!pk.isDitto,
+      ativo: false,
+      time: !!pk.team,
+      tipos,
+      nivel: pk.level,
+      qualidade: pk.quality || 1,
+      ivTotal: pk.ivTotal != null ? pk.ivTotal : 96,
+      stats,
+      poder: power || 0,
+      fonte: 'tooltip'
+    };
+
+    // 1. Usar el bridge nativo expuesto en index.html si está disponible
+    if (typeof window.pgOpenIv === 'function') {
+      window.pgOpenIv(payload, accIdx);
+      return;
+    }
+
+    // 2. Fallback: inyectar a través de console-message del webview
+    const webviews = state.webviews || Array.from(document.querySelectorAll('webview'));
+    const targetWv = webviews[accIdx] || webviews[0];
+    if (targetWv) {
+      try {
+        targetWv.executeJavaScript("console.log('__PGIV__" + JSON.stringify(payload).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "')").catch(() => {});
+      } catch (e) {}
+    }
+
+    // Asegurar que #ivCard se muestre
+    const ivCard = document.getElementById('ivCard');
+    if (ivCard && !ivCard.classList.contains('show')) {
+      const ivsBtn = document.getElementById('ivsBtn');
+      if (ivsBtn) ivsBtn.click();
+    }
+  };
+
+  // Botón en la barra superior (topbar)
+  window.mountPokesButton = function() {
+    if (document.getElementById('pokesBtn')) return;
+    const topbar = document.getElementById('topbar');
+    if (!topbar) return;
+
+    const target = document.getElementById('ocBtn') || document.getElementById('ivsBtn');
+    const btn = document.createElement('button');
+    btn.id = 'pokesBtn';
+    btn.title = 'Pokémon (Nv 300+)\nVer todos los Pokémon de nivel 300 o más de todas las cuentas';
+    btn.setAttribute('aria-label', 'Pokémon');
+    btn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;font-weight:600;background:transparent;border:1px solid transparent;border-radius:6px;color:#c9d1d9;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease;';
+
+    const pokeSvg = '<svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3.5" fill="var(--sf2, #161b22)"/></svg>';
+    btn.innerHTML = pokeSvg + '<span class="lbl">Pokémon</span>';
+
+    btn.onmouseenter = () => {
+      if (!btn.classList.contains('on')) {
+        btn.style.background = 'var(--bd, #21262d)';
+        btn.style.borderColor = 'var(--bd2, #30363d)';
+        btn.style.color = 'var(--tx, #e6edf3)';
+      }
+    };
+    btn.onmouseleave = () => {
+      if (!btn.classList.contains('on')) {
+        btn.style.background = 'transparent';
+        btn.style.borderColor = 'transparent';
+        btn.style.color = '#c9d1d9';
+      }
+    };
+    btn.onclick = () => {
+      const ov = document.getElementById('pokesOverlay');
+      if (ov && ov.classList.contains('show')) {
+        window.closePokesModal();
+      } else {
+        window.openPokesModal();
+      }
+    };
+
+    if (target && target.nextSibling) {
+      topbar.insertBefore(btn, target.nextSibling);
+    } else {
+      topbar.appendChild(btn);
+    }
+  };
+
+  // Tecla Escape cierra modal de Pokémon si está abierto
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const ov = document.getElementById('pokesOverlay');
+      if (ov && ov.classList.contains('show')) {
+        window.closePokesModal();
+      }
+    }
+  });
+
+  // Ejecución inicial y observación de cambios en el contenedor de cards y topbar
   setTimeout(() => {
+    window.mountPokesButton();
     window.enhanceInvCard();
+
     const cards = document.getElementById('cards');
     if (cards && !window.__cardsInvObserver) {
       window.__cardsInvObserver = new MutationObserver(() => {
         if (!isEnhancing) window.enhanceInvCard();
       });
       window.__cardsInvObserver.observe(cards, { childList: true, subtree: true });
+    }
+
+    const topbar = document.getElementById('topbar');
+    if (topbar && !window.__topbarPokesObserver) {
+      window.__topbarPokesObserver = new MutationObserver(() => {
+        window.mountPokesButton();
+      });
+      window.__topbarPokesObserver.observe(topbar, { childList: true });
     }
   }, 50);
 })();
