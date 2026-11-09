@@ -664,7 +664,7 @@
       border: 1px solid var(--bd2, #30363d);
       border-radius: 12px;
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
-      width: 980px;
+      width: 1100px;
       max-width: 96vw;
       height: 88vh;
       max-height: 880px;
@@ -845,6 +845,7 @@
     .bs-content-scroll {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 16px 18px;
       display: flex;
       flex-direction: column;
@@ -864,7 +865,7 @@
       width: 100%;
     }
     .bs-layout-sidebar {
-      width: 290px;
+      width: 270px;
       flex: none;
       display: flex;
       flex-direction: column;
@@ -1144,12 +1145,13 @@
       background: var(--sf2, #1c2128);
       border: 1px solid var(--bd2, #30363d);
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 12px;
       transition: all 0.15s ease;
+      min-width: 0;
     }
     .bs-fighter-card:hover {
       background: var(--bd, #21262d);
@@ -1163,13 +1165,13 @@
     .bs-fc-left {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex: 1.25;
-      min-width: 290px;
+      gap: 10px;
+      flex: 1.15;
+      min-width: 0;
     }
     .bs-slot-badge {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 6px;
       display: flex;
       align-items: center;
@@ -1181,8 +1183,8 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
     .bs-fc-avatar {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       flex: none;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.3);
@@ -1193,30 +1195,34 @@
       overflow: hidden;
     }
     .bs-fc-avatar img {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
       image-rendering: pixelated;
     }
     .bs-fc-info {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       min-width: 0;
+      flex: 1;
     }
     .bs-fc-name-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .bs-fc-name {
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--tx, #e6edf3);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .bs-fc-sub {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--mut, #8b949e);
       display: flex;
       align-items: center;
@@ -1227,39 +1233,39 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--tx2, #c9d1d9);
     }
     .bs-fc-badges {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
       margin-top: 2px;
     }
     .bs-badge-clan {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 1px 7px;
+      padding: 1px 6px;
       border-radius: 4px;
       background: rgba(126, 231, 135, 0.12);
       border: 1px solid rgba(126, 231, 135, 0.35);
       color: #7ee787;
     }
     .bs-badge-held {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 1px 7px;
+      padding: 1px 6px;
       border-radius: 4px;
       background: rgba(210, 168, 255, 0.12);
       border: 1px solid rgba(210, 168, 255, 0.35);
       color: #d2a8ff;
     }
     .bs-fc-status {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 999px;
     }
     .bs-fc-status.survived {
@@ -1279,29 +1285,31 @@
     }
     .bs-fc-metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      padding: 8px 14px;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 6px 12px;
+      padding: 8px 12px;
       background: rgba(0, 0, 0, 0.28);
       border: 1px solid rgba(255, 255, 255, 0.04);
       border-radius: 8px;
-      flex: 1.5;
-      min-width: 380px;
+      flex: 1;
+      min-width: 210px;
     }
     .bs-fc-metric-item {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
+      min-width: 0;
     }
     .bs-fc-metric-lbl {
       color: var(--mut, #8b949e);
-      font-size: 11.5px;
+      font-size: 11px;
       white-space: nowrap;
     }
     .bs-fc-metric-val {
       color: var(--tx, #e6edf3);
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12px;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
@@ -1316,27 +1324,28 @@
       align-items: flex-end;
       justify-content: center;
       gap: 2px;
-      flex: 0 0 135px;
+      flex: 0 0 115px;
       text-align: right;
-      padding-left: 12px;
+      padding-left: 10px;
       border-left: 1px solid rgba(255, 255, 255, 0.06);
     }
     .bs-fc-dmg-top {
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 4px;
     }
     .bs-fc-dmg-pct {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 800;
       line-height: 1;
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.5px;
     }
     .bs-fc-dmg-lbl {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--mut, #8b949e);
+      white-space: nowrap;
     }
     .bs-fc-dmg-track {
       width: 100%;
@@ -1344,7 +1353,7 @@
       background: rgba(255, 255, 255, 0.08);
       border-radius: 999px;
       overflow: hidden;
-      margin-top: 4px;
+      margin-top: 3px;
     }
     .bs-fc-dmg-fill {
       height: 100%;
