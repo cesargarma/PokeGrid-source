@@ -802,6 +802,15 @@
         if (!p) continue;
         const lv = +p.level || 0;
         if (lv >= 300) {
+          const s = (p.stats && typeof p.stats === 'object') ? p.stats : p;
+          const hp = +(s.hp != null ? s.hp : s.maxHp != null ? s.maxHp : s.totalHp || 0);
+          const atk = +(s.atk != null ? s.atk : s.attack || 0);
+          const def = +(s.def != null ? s.def : s.defense || 0);
+          const spa = +(s.spa != null ? s.spa : s.spAtk != null ? s.spAtk : s.spatk != null ? s.spatk : s.specialAttack || 0);
+          const spd = +(s.spd != null ? s.spd : s.spDef != null ? s.spDef : s.spdef != null ? s.spdef : s.specialDefense || 0);
+          const vel = +(s.vel != null ? s.vel : s.speed || 0);
+          const parsedStats = (hp > 0 && atk > 0 && def > 0 && spa > 0 && spd > 0 && vel > 0) ? { hp, atk, def, spa, spd, vel } : null;
+
           res.push({
             id: p.id != null ? String(p.id) : '',
             name: p.name || '?',
@@ -817,7 +826,7 @@
             type1: p.type1 ? String(p.type1).toUpperCase() : '',
             type2: p.type2 ? String(p.type2).toUpperCase() : '',
             isDitto: !!p.isDitto,
-            stats: p.stats || (p.hp != null && p.atk != null ? { hp: +p.hp, atk: +p.atk, def: +p.def, spa: +p.spa, spd: +p.spd, vel: +p.speed || +p.vel } : null)
+            stats: parsedStats
           });
         }
       }
@@ -1314,23 +1323,50 @@
       const qual = +pk.quality > 0 ? +pk.quality : 1;
       const ivTot = pk.ivTotal != null ? Math.max(0, Math.min(192, Math.round(+pk.ivTotal))) : null;
 
-      // Proyectar estadísticas reales usando PokeGridIvMath si no venían en el objeto
-      if ((!stats || !stats.hp) && b && window.PokeGridIvMath) {
+      // Verificar si tenemos estadísticas completas y válidas (los 6 atributos > 0)
+      const hasAllStats = stats &&
+        +stats.hp > 0 &&
+        +stats.atk > 0 &&
+        +stats.def > 0 &&
+        +stats.spa > 0 &&
+        +stats.spd > 0 &&
+        +(stats.vel != null ? stats.vel : stats.speed) > 0;
+
+      const baseObj = b ? { hp: b[0], atk: b[1], def: b[2], spa: b[3], spd: b[4], speed: b[5] } : null;
+      let statsAreObserved = false;
+
+      // Si los 6 stats estaban presentes, comprobar si cierran con normalizeIvs
+      if (hasAllStats && baseObj && window.PokeGridIvMath) {
+        try {
+          const testIv = window.PokeGridIvMath.normalizeIvs({
+            level: lvl,
+            quality: qual,
+            ivTotal: ivTot,
+            power: Math.round(+power || 0),
+            observedStats: {
+              hp: Math.round(+stats.hp),
+              atk: Math.round(+stats.atk),
+              def: Math.round(+stats.def),
+              spa: Math.round(+stats.spa),
+              spd: Math.round(+stats.spd),
+              speed: Math.round(+(stats.vel != null ? stats.vel : stats.speed))
+            },
+            species: { baseStats: baseObj }
+          });
+          if (testIv && /^observed/.test(testIv.source)) {
+            statsAreObserved = true;
+          }
+        } catch (e) {}
+      }
+
+      // Si no están completos o no cierran de forma exacta, proyectar stats teóricos congruentes con ivTotal
+      if (!statsAreObserved && baseObj && window.PokeGridIvMath) {
         try {
           const proj = window.PokeGridIvMath.projectPokemon({
             level: lvl,
             quality: qual,
             ivTotal: ivTot != null ? ivTot : 96,
-            species: {
-              baseStats: {
-                hp: b[0],
-                atk: b[1],
-                def: b[2],
-                spa: b[3],
-                spd: b[4],
-                speed: b[5]
-              }
-            }
+            species: { baseStats: baseObj }
           }, lvl);
           if (proj && proj.stats) {
             stats = {
