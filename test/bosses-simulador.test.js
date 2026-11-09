@@ -41,6 +41,7 @@ const fn = new Function('sandbox', moduleCode + '\n' + `
   sandbox.evaluateCandidateVsBoss = evaluateCandidateVsBoss;
   sandbox.simulateTeamBattle = simulateTeamBattle;
   sandbox.getItemIconUrl = getItemIconUrl;
+  sandbox.HELD_OFFICIAL_TABLE = HELD_OFFICIAL_TABLE;
 `);
 fn(sandbox);
 
@@ -81,22 +82,26 @@ assert.equal(Object.keys(CLAN_INFO).length, 10, 'CLAN_INFO debe contener los 10 
 
 console.log('OK  CLAN_TYPES_TABLE y CLAN_INFO validados con afinidades oficiales e iconos');
 
-// 4. Verificar multiplicadores de Held Items
-const vit = getHeldItemBonus('X-Vitality');
-assert.equal(vit.hp, 1.15, 'X-Vitality debe dar +15% HP');
-assert.equal(vit.atk, 1.0, 'X-Vitality no debe alterar Atk');
+// 4. Verificar multiplicadores de Held Items (Valores oficiales de Pokepedia)
+const vit3 = getHeldItemBonus('vida_3');
+assert.equal(vit3.hp, 1.03, 'vida_3 (X-Vitality Tier III) debe dar +3% HP');
+assert.equal(vit3.atk, 1.0, 'X-Vitality no debe alterar Atk');
+assert.equal(vit3.label, 'X-Vitality III (+3% HP)');
 
-const atk = getHeldItemBonus('X-Attack');
-assert.equal(atk.atk, 1.15, 'X-Attack debe dar +15% Atk');
+const vit1 = getHeldItemBonus('X-Vitality Tier 1');
+assert.equal(vit1.hp, 1.0125, 'X-Vitality Tier I debe dar +1.25% HP');
 
-const def = getHeldItemBonus('X-Defense');
-assert.equal(def.def, 1.15, 'X-Defense debe dar +15% Def');
+const atk3 = getHeldItemBonus('ataque_3');
+assert.equal(atk3.atk, 1.04, 'ataque_3 (X-Attack Tier III) debe dar +4% Atk');
 
-const boost = getHeldItemBonus('X-Boost');
-assert.equal(boost.atk, 1.10, 'X-Boost debe dar +10% Atk');
-assert.equal(boost.def, 1.10, 'X-Boost debe dar +10% Def');
+const def3 = getHeldItemBonus('defesa_3');
+assert.equal(def3.def, 1.04, 'defesa_3 (X-Defense Tier III) debe dar +4% Def');
 
-console.log('OK  Held Items aplicados (+15% HP, +15% Atk, +15% Def, +10% Boost)');
+const misto3 = getHeldItemBonus('misto_3');
+assert.equal(misto3.atk, 1.02, 'misto_3 (X-Boost Tier III) debe dar +2% Atk');
+assert.equal(misto3.def, 1.02, 'misto_3 (X-Boost Tier III) debe dar +2% Def');
+
+console.log('OK  Held Items oficiales aplicados (X-Vitality +3% HP, X-Attack +4% Atk, X-Defense +4% Def, X-Boost +2% Atk/Def)');
 
 // 5. Verificar cálculo de sinergia de Clan (+15% ATK)
 const pokeGrass = { name: 'Venusaur', level: 400, quality: 1.5, type1: 'GRASS', type2: 'POISON', stats: { hp: 4000, atk: 1200, def: 1000, spa: 1200, spd: 1000, vel: 800 } };

@@ -2700,20 +2700,75 @@
     return rem > 0 ? (m + ' min ' + rem + ' s') : (m + ' min');
   };
 
+  const HELD_OFFICIAL_TABLE = {
+    attack:      { 1: 0.02, 2: 0.03, 3: 0.04, 4: 0.05, 5: 0.06, 6: 0.07, 7: 0.08, 8: 0.09 },
+    defense:     { 1: 0.02, 2: 0.03, 3: 0.04, 4: 0.05, 5: 0.06, 6: 0.07, 7: 0.08, 8: 0.09 },
+    vitality:    { 1: 0.0125, 2: 0.02, 3: 0.03, 4: 0.0375, 5: 0.0475, 6: 0.055, 7: 0.0625, 8: 0.07 },
+    boost:       { 1: 0.01, 2: 0.015, 3: 0.02, 4: 0.025, 5: 0.03, 6: 0.035, 7: 0.04, 8: 0.045 },
+    critical:    { 1: 0.02, 2: 0.025, 3: 0.03, 4: 0.035, 5: 0.04, 6: 0.05, 7: 0.06, 8: 0.0675 },
+    block:       { 1: 0.015, 2: 0.02, 3: 0.025, 4: 0.03, 5: 0.035, 6: 0.045, 7: 0.055, 8: 0.0625 },
+    experience:  { 1: 0.025, 2: 0.0375, 3: 0.05, 4: 0.0625, 5: 0.075, 6: 0.0875, 7: 0.10, 8: 0.1125 },
+    lucky:       { 1: 0.025, 2: 0.05, 3: 0.0875, 4: 0.125, 5: 0.1625, 6: 0.20, 7: 0.25, 8: 0.30 }
+  };
+
   function getHeldItemBonus(heldStr) {
     if (!heldStr) return { hp: 1.0, atk: 1.0, def: 1.0, label: null };
     const h = String(heldStr).toLowerCase();
-    const tierMatch = h.match(/(?:tier\s*|_)([0-9]+)/);
-    const tierNum = tierMatch ? parseInt(tierMatch[1], 10) : null;
-    const tierPct = tierNum !== null ? (tierNum * 0.01) : 0.15;
-    const tierLabel = tierNum !== null ? (' (Nv. ' + tierNum + ' · +' + tierNum + '%)') : ' (+15%)';
+    const tierMatch = h.match(/(?:tier\s*|[_-t])([1-8])(?![0-9])/i) || h.match(/([1-8])$/);
+    const tierNum = tierMatch ? parseInt(tierMatch[1], 10) : 1;
+    const tierRoman = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'][tierNum] || String(tierNum);
+    const fmtPct = (val) => '+' + (val * 100).toFixed(2).replace(/\.00$/, '') + '%';
 
-    if (h.includes('vitality') || h.includes('vida')) return { hp: 1.0 + tierPct, atk: 1.0, def: 1.0, label: 'X-Vitality' + tierLabel };
-    if (h.includes('attack') || h.includes('ataque')) return { hp: 1.0, atk: 1.0 + tierPct, def: 1.0, label: 'X-Attack' + tierLabel };
-    if (h.includes('defense') || h.includes('defesa')) return { hp: 1.0, atk: 1.0, def: 1.0 + tierPct, label: 'X-Defense' + tierLabel };
-    if (h.includes('boost') || h.includes('misto')) return { hp: 1.0, atk: 1.0 + (tierNum !== null ? tierPct : 0.10), def: 1.0 + (tierNum !== null ? tierPct : 0.10), label: 'X-Boost' + (tierNum !== null ? tierLabel : ' (+10%)') };
-    if (h.includes('exp') || h.includes('experience')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Exp (+Exp)' };
-    if (h.includes('lucky') || h.includes('sorte')) return { hp: 1.0, atk: 1.0, def: 1.0, label: 'X-Lucky (+Loot)' };
+    // X-Attack
+    if (h.includes('attack') || h.includes('ataque')) {
+      const pct = (HELD_OFFICIAL_TABLE.attack[tierNum] != null) ? HELD_OFFICIAL_TABLE.attack[tierNum] : 0.03;
+      return { hp: 1.0, atk: 1.0 + pct, def: 1.0, label: `X-Attack ${tierRoman} (${fmtPct(pct)} Atk)` };
+    }
+
+    // X-Vitality
+    if (h.includes('vitality') || h.includes('vida')) {
+      const pct = (HELD_OFFICIAL_TABLE.vitality[tierNum] != null) ? HELD_OFFICIAL_TABLE.vitality[tierNum] : 0.02;
+      return { hp: 1.0 + pct, atk: 1.0, def: 1.0, label: `X-Vitality ${tierRoman} (${fmtPct(pct)} HP)` };
+    }
+
+    // X-Defense
+    if (h.includes('defense') || h.includes('defesa')) {
+      const pct = (HELD_OFFICIAL_TABLE.defense[tierNum] != null) ? HELD_OFFICIAL_TABLE.defense[tierNum] : 0.03;
+      return { hp: 1.0, atk: 1.0, def: 1.0 + pct, label: `X-Defense ${tierRoman} (${fmtPct(pct)} Def)` };
+    }
+
+    // X-Boost (Misto / Mixto)
+    if (h.includes('boost') || h.includes('misto')) {
+      const pct = (HELD_OFFICIAL_TABLE.boost[tierNum] != null) ? HELD_OFFICIAL_TABLE.boost[tierNum] : 0.015;
+      return { hp: 1.0, atk: 1.0 + pct, def: 1.0 + pct, label: `X-Boost ${tierRoman} (${fmtPct(pct)} Atk/Def)` };
+    }
+
+    // X-Critical (+50% daño al activarse)
+    if (h.includes('critical') || h.includes('critico') || h.includes('crítico')) {
+      const rate = (HELD_OFFICIAL_TABLE.critical[tierNum] != null) ? HELD_OFFICIAL_TABLE.critical[tierNum] : 0.025;
+      const effectiveAtkBoost = rate * 0.50;
+      return { hp: 1.0, atk: 1.0 + effectiveAtkBoost, def: 1.0, label: `X-Critical ${tierRoman} (${(rate * 100).toFixed(1)}% Crítico)` };
+    }
+
+    // X-Block (Absorbe 90% daño al activarse)
+    if (h.includes('block') || h.includes('bloqueo')) {
+      const rate = (HELD_OFFICIAL_TABLE.block[tierNum] != null) ? HELD_OFFICIAL_TABLE.block[tierNum] : 0.02;
+      const effectiveHpBoost = rate * 0.90;
+      return { hp: 1.0 + effectiveHpBoost, atk: 1.0, def: 1.0, label: `X-Block ${tierRoman} (${(rate * 100).toFixed(2).replace(/\.00$/, '')}% Bloqueo)` };
+    }
+
+    // X-Experience
+    if (h.includes('exp') || h.includes('experience')) {
+      const pct = (HELD_OFFICIAL_TABLE.experience[tierNum] != null) ? HELD_OFFICIAL_TABLE.experience[tierNum] : 0.0375;
+      return { hp: 1.0, atk: 1.0, def: 1.0, label: `X-Experience ${tierRoman} (${fmtPct(pct)} XP)` };
+    }
+
+    // X-Lucky
+    if (h.includes('lucky') || h.includes('sorte')) {
+      const pct = (HELD_OFFICIAL_TABLE.lucky[tierNum] != null) ? HELD_OFFICIAL_TABLE.lucky[tierNum] : 0.05;
+      return { hp: 1.0, atk: 1.0, def: 1.0, label: `X-Lucky ${tierRoman} (${fmtPct(pct)} Loot)` };
+    }
+
     return { hp: 1.0, atk: 1.0, def: 1.0, label: heldStr };
   }
 
@@ -3169,7 +3224,7 @@
     scopeHtml += `
         </div>
         <div class="bs-scope-tip">
-          <span>💡 Boss sin tipos elementales · Se aplican bonos de Clan (+15% ATK) y Held Items (+15%)</span>
+          <span>💡 Boss sin tipos elementales · Se aplican bonos de Clan (+15% ATK) y Held Items oficiales según su Tier</span>
         </div>
       </div>
     `;
