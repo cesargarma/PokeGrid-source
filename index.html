@@ -4800,9 +4800,16 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
       const nOc = lista.filter(x => invHidden[x.id]).length; // ocultos pelo x: saem da lista, o rodape traz de volta (apagados)
       if (!showHiddenInv) lista = lista.filter(x => !invHidden[x.id]);
       lista.sort((a, b) => (b.fav - a.fav) || (b.q - a.q));
+      const favCount = lista.filter(x => x.fav).length;
+      let sepAdded = false;
       const linhas = lista.slice(0, 80).map(x => { const oc = !!invHidden[x.id]; const fav = !!x.fav;
         const favStar = '<span class="cd-fav-inv" data-inv="' + esc(x.id) + '" data-n="' + esc(x.n) + '" title="' + (fav ? (t('cdInvUnfav') || 'Remover dos favoritos') : (t('cdInvFav') || 'Fixar como favorito')) + '" style="cursor:pointer;flex:none;font-size:13px;line-height:1;margin-left:6px;user-select:none;color:' + (fav ? 'var(--gold)' : '#444c56') + '">' + (fav ? '★' : '☆') + '</span>';
-        return '<div class="cd-row' + (oc ? ' cd-dim' : '') + '" title="' + x.por.join(' · ') + '"><span class="rn">' + (icSrc(x.ic) ? '<img src="' + icSrc(x.ic) + '" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px" onerror="this.remove()">' : '') + esc(x.n) + '</span><span>' + nc(x.q) + '</span>' // quantidade neutra: dourado e so dinheiro
+        let sepHtml = '';
+        if (favCount > 0 && !fav && !sepAdded) {
+          sepAdded = true;
+          sepHtml = '<div class="cd-fav-sep" style="display:flex;align-items:center;gap:8px;margin:8px 0;padding:2px 0"><span style="flex:1;height:1px;background:var(--bd2)"></span><span style="font-size:11px;color:var(--mut);font-weight:600;letter-spacing:0.04em;text-transform:uppercase">' + (filtro ? 'Resultados' : 'Otros') + '</span><span style="flex:1;height:1px;background:var(--bd2)"></span></div>';
+        }
+        return sepHtml + '<div class="cd-row' + (oc ? ' cd-dim' : '') + '" title="' + x.por.join(' · ') + '"><span class="rn">' + (icSrc(x.ic) ? '<img src="' + icSrc(x.ic) + '" style="width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px" onerror="this.remove()">' : '') + esc(x.n) + '</span><span>' + nc(x.q) + '</span>' // quantidade neutra: dourado e so dinheiro
           + favStar + '<span class="cd-hide" data-inv="' + esc(x.id) + '" title="' + (oc ? t('cdUnhide') : t('cdInvHide')) + '" style="cursor:pointer;color:' + (oc ? 'var(--ok)' : 'var(--mut)') + '">' + ico(oc ? 'voltar' : 'fechar') + '</span></div>'; }).join('');
       const pe = nOc ? '<div style="text-align:center;padding:6px 0"><a id="cdShowHiddenInv" style="cursor:pointer;color:var(--mut);font-size:11px">' + (showHiddenInv ? t('cdInvHideHidden') : t('cdInvShowHidden').replace('{n}', nOc)) + '</a></div>' : '';
       return '<div class="cd-sec"><div class="cd-h">' + t('cdInv') + ' <span style="font-size:11px;color:var(--mut);text-transform:none">bag + depot</span></div>'

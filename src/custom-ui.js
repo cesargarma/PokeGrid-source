@@ -1,5 +1,14 @@
 // src/custom-ui.js - Extensión de UI en vivo para PokeGrid (recarga sin reiniciar juegos)
 (function() {
+  // Asegurar que cdInvF no mantenga un filtro estricto que destruya los elementos en SB.inv
+  try {
+    const lastF = localStorage.getItem('cdInvF');
+    if (lastF) {
+      window.__invFilterSaved = lastF;
+      localStorage.setItem('cdInvF', '');
+    }
+  } catch {}
+
   // Estilos personalizados
   window.setCustomStyle = function(css) {
     let el = document.getElementById('pgCustomStyle');
@@ -24,6 +33,33 @@
     .cd-fav-inv:hover {
       transform: scale(1.25);
       color: var(--gold) !important;
+    }
+    .cd-fav-sep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 6px;
+      padding: 2px 2px;
+      user-select: none;
+    }
+    .cd-fav-sep-line {
+      flex: 1;
+      height: 1px;
+      background: var(--bd2);
+    }
+    .cd-fav-sep-line.left {
+      background: linear-gradient(90deg, rgba(227,179,65,0.45), var(--bd2));
+    }
+    .cd-fav-sep-line.right {
+      background: linear-gradient(90deg, var(--bd2), rgba(227,179,65,0.45));
+    }
+    .cd-fav-sep-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--mut);
+      white-space: nowrap;
     }
   `);
 
@@ -84,7 +120,10 @@
     return '<div class="cd-sec"><div class="cd-h" style="display:flex;align-items:center;gap:8px"><span>' + (t('cdConsumables') || 'Consumibles') + '</span></div>' + inner + '</div>';
   };
 
-  // Card Inventario Global en caliente (permite marcar favoritos y fijarlos arriba)
+  // Cache persistente de elementos de inventario para que los favoritos nunca desaparezcan
+  window.__invCache = window.__invCache || {};
+
+  // Card Inventario Global en caliente (permite marcar favoritos, fijarlos arriba y barra separadora)
   let isEnhancing = false;
   window.enhanceInvCard = function() {
     if (isEnhancing) return;
@@ -97,12 +136,91 @@
     const inp = invIt.querySelector('#cdInvF');
     const filterText = (inp ? inp.value : '').trim().toLowerCase();
 
-    const rows = Array.from(invIt.querySelectorAll('.cd-row'));
-    if (!rows.length) return;
+    // Interceptar input, enter y change en cdInvF para que nunca limpie la lista de favoritos
+    if (inp && !inp.__hasFavIntercept) {
+      inp.__hasFavIntercept = true;
+      inp.onkeydown = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          inp.blur();
+          try { localStorage.setItem('cdInvF', ''); } catch {}
+          window.enhanceInvCard();
+        }
+      };
+      inp.onchange = function(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+        try { localStorage.setItem('cdInvF', ''); } catch {}
+        window.enhanceInvCard();
+      };
+      inp.oninput = function() {
+        window.enhanceInvCard();
+      };
+    }
+
+    // Buscar contenedor de filas
+    const cdSec = invIt.querySelector('.cd-sec');
+    if (!cdSec) return;
 
     isEnhancing = true;
     try {
-      rows.forEach(row => {
+      // Registrar y cachear filas existentes
+      const currentRows = Array.from(invIt.querySelectorAll('.cd-row'));
+      currentRows.forEach(row => {
+        const hideEl = row.querySelector('.cd-hide[data-inv]');
+        const starEl = row.querySelector('.cd-fav-inv');
+        const id = (starEl && starEl.dataset.inv) || (hideEl && hideEl.dataset.inv) || '';
+        const rnEl = row.querySelector('.rn');
+        const nameText = rnEl ? rnEl.textContent.trim() : '';
+        if (id) {
+          window.__invCache[id] = {
+            id,
+            name: nameText || id,
+            rowHtml: row.outerHTML
+          };
+        }
+      });
+
+      // Si hay favoritos guardados que no están en el DOM (porque la búsqueda o paginación los ocultó), restaurarlos del cache
+      for (const favId in invFavs) {
+        if (!invFavs[favId]) continue;
+        const exists = currentRows.some(r => {
+          const s = r.querySelector('.cd-fav-inv') || r.querySelector('.cd-hide[data-inv]');
+          return s && s.dataset.inv === favId;
+        });
+        if (!exists) {
+          const cached = window.__invCache[favId];
+          const itemName = (cached && cached.name) || (typeof invFavs[favId] === 'string' ? invFavs[favId] : ('#' + favId));
+          const newRow = document.createElement('div');
+          newRow.className = 'cd-row';
+          newRow.title = itemName;
+          newRow.innerHTML = '<span class="rn">' + itemName + '</span><span>0</span>'
+            + '<span class="cd-fav-inv" data-inv="' + favId + '" data-n="' + itemName + '" title="Quitar de favoritos" style="cursor:pointer;flex:none;font-size:13px;line-height:1;margin-left:6px;user-select:none;color:var(--gold)">★</span>'
+            + '<span class="cd-hide" data-inv="' + favId + '" style="cursor:pointer;color:var(--mut)"><svg class="ico" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4L4 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>';
+          // Insertar en la lista
+          const cfgRow = invIt.querySelector('.cd-cfg-row');
+          if (cfgRow && cfgRow.nextSibling) {
+            cdSec.insertBefore(newRow, cfgRow.nextSibling);
+          } else {
+            cdSec.appendChild(newRow);
+          }
+          currentRows.push(newRow);
+        }
+      }
+
+      // Si tenemos favoritos y había un aviso de "nada todavía", removerlo
+      const hasAnyFav = Object.keys(invFavs).some(k => invFavs[k]);
+      const emptyEl = invIt.querySelector('.cd-empty');
+      if (hasAnyFav && emptyEl) {
+        emptyEl.remove();
+      }
+
+      // Procesar todas las filas actualizadas
+      const allRows = Array.from(invIt.querySelectorAll('.cd-row'));
+      allRows.forEach(row => {
         const hideEl = row.querySelector('.cd-hide[data-inv]');
         let star = row.querySelector('.cd-fav-inv');
         const id = (star && star.dataset.inv) || (hideEl && hideEl.dataset.inv) || '';
@@ -137,13 +255,12 @@
             invFavs[id] = nameText || 1;
           }
           try { localStorage.setItem('invFavs', JSON.stringify(invFavs)); } catch {}
-          if (typeof cdHtmlAnt !== 'undefined') { window.cdHtmlAnt = ''; }
-          if (typeof refreshCards === 'function') { refreshCards(true); }
-          else { window.enhanceInvCard(); }
+          try { localStorage.setItem('cdInvF', ''); } catch {}
+          window.enhanceInvCard();
         };
 
         // Filtro de búsqueda:
-        // Los favoritos se muestran SIEMPRE independientemente de la búsqueda que se haga
+        // Los favoritos se muestran SIEMPRE independientemente de la búsqueda
         if (isFav) {
           row.style.display = '';
         } else if (filterText) {
@@ -153,26 +270,49 @@
         }
       });
 
-      // Reordenar en el DOM: favoritos arriba de todo
-      const container = rows[0].parentNode;
-      const favRows = rows.filter(r => r.__isFav);
-      const nonFavRows = rows.filter(r => !r.__isFav);
-      const sorted = favRows.concat(nonFavRows);
+      // Separar filas favoritas y no favoritas
+      const favRows = allRows.filter(r => r.__isFav);
+      const nonFavRows = allRows.filter(r => !r.__isFav);
+      const visibleNonFavs = nonFavRows.filter(r => r.style.display !== 'none');
 
-      sorted.forEach(r => container.appendChild(r));
+      // Buscar o crear la barra separadora
+      let sep = invIt.querySelector('.cd-fav-sep');
+      if (favRows.length > 0) {
+        if (!sep) {
+          sep = document.createElement('div');
+          sep.className = 'cd-fav-sep';
+          sep.innerHTML = '<span class="cd-fav-sep-line left"></span><span class="cd-fav-sep-text"></span><span class="cd-fav-sep-line right"></span>';
+        }
+        const textEl = sep.querySelector('.cd-fav-sep-text');
+        if (filterText) {
+          if (visibleNonFavs.length > 0) {
+            textEl.textContent = 'Resultados (' + visibleNonFavs.length + ')';
+          } else {
+            textEl.textContent = 'Sin otros resultados para "' + filterText + '"';
+          }
+        } else {
+          textEl.textContent = 'Otros ítems (' + nonFavRows.length + ')';
+        }
+        sep.style.display = '';
+      } else if (sep) {
+        sep.style.display = 'none';
+      }
 
-      // Mantener el enlace de ocultos al final si existe
+      // Reordenar en el DOM:
+      // 1. Filas favoritas arriba del todo
+      // 2. Barra separadora (si hay favoritos)
+      // 3. Filas no favoritas
+      // 4. Pie de página (mostrar ocultos)
+      const container = allRows.length ? allRows[0].parentNode : cdSec;
+      favRows.forEach(r => container.appendChild(r));
+      if (sep && favRows.length > 0) {
+        container.appendChild(sep);
+      }
+      nonFavRows.forEach(r => container.appendChild(r));
+
       const pe = invIt.querySelector('#cdShowHiddenInv');
       if (pe && pe.parentNode && pe.parentNode.parentNode === container) {
         container.appendChild(pe.parentNode);
-      }
-
-      // Conectar evento input para filtrado dinámico en vivo
-      if (inp && !inp.__hasFavFilterListener) {
-        inp.__hasFavFilterListener = true;
-        inp.addEventListener('input', () => {
-          window.enhanceInvCard();
-        });
       }
     } finally {
       setTimeout(() => { isEnhancing = false; }, 30);
