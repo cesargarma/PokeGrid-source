@@ -857,41 +857,75 @@
       background: var(--bd2, #30363d);
       border-radius: 3px;
     }
+    .bs-battle-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      width: 100%;
+    }
+    .bs-layout-sidebar {
+      width: 290px;
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+    }
+    .bs-layout-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
     .bs-scope-bar {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 8px 12px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 14px;
       background: var(--sf2, #1c2128);
       border: 1px solid var(--bd2, #30363d);
       border-radius: 8px;
     }
-    .bs-scope-chips {
+    .bs-scope-head {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
+      justify-content: space-between;
       gap: 6px;
     }
+    .bs-scope-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--tx, #e6edf3);
+    }
+    .bs-scope-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+    }
     .bs-scope-chip {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 10px;
+      gap: 7px;
+      width: 100%;
+      padding: 6px 10px;
       font-size: 11.5px;
       font-weight: 600;
       background: var(--bd, #21262d);
       border: 1px solid var(--bd2, #30363d);
-      border-radius: 999px;
+      border-radius: 6px;
       color: var(--mut, #8b949e);
       cursor: pointer;
       user-select: none;
       transition: all 0.12s ease;
+      text-align: left;
     }
     .bs-scope-chip:hover {
       border-color: var(--mut, #8b949e);
       color: var(--tx, #e6edf3);
+      background: rgba(255, 255, 255, 0.04);
     }
     .bs-scope-chip.on {
       background: rgba(88, 166, 255, 0.15);
@@ -902,15 +936,17 @@
     .bs-scope-tip {
       font-size: 11px;
       color: var(--mut, #8b949e);
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      line-height: 1.45;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--bd2, #30363d);
+      border-radius: 8px;
     }
     .bs-clan-bar {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       background: var(--sf2, #1c2128);
       border: 1px solid var(--bd2, #30363d);
       border-radius: 8px;
@@ -921,38 +957,42 @@
       gap: 2px;
     }
     .bs-clan-lbl {
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--tx, #e6edf3);
     }
     .bs-clan-sub {
       font-size: 11px;
       color: var(--mut, #8b949e);
+      line-height: 1.35;
     }
     .bs-clan-chips {
       display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
     }
     .bs-clan-chip {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 3px 10px;
+      gap: 7px;
+      width: 100%;
+      padding: 6px 10px;
       font-size: 11.5px;
       font-weight: 600;
       background: var(--bd, #21262d);
       border: 1px solid var(--bd2, #30363d);
-      border-radius: 999px;
+      border-radius: 6px;
       color: var(--mut, #8b949e);
       cursor: pointer;
       user-select: none;
       transition: all 0.12s ease;
+      text-align: left;
     }
     .bs-clan-chip:hover {
       border-color: var(--mut, #8b949e);
       color: var(--tx, #e6edf3);
+      background: rgba(255, 255, 255, 0.04);
     }
     .bs-clan-chip.on {
       background: rgba(88, 166, 255, 0.15);
@@ -964,22 +1004,22 @@
       font-size: 11px;
       font-weight: 400;
       opacity: 0.8;
+      margin-left: auto;
     }
     .bs-clan-fixed {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
     }
     .bs-clan-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
+      gap: 6px;
+      padding: 6px 10px;
       font-size: 11.5px;
       font-weight: 700;
       border: 1px solid var(--bd2, #30363d);
-      border-radius: 999px;
+      border-radius: 6px;
       background: rgba(255, 255, 255, 0.04);
     }
     .bs-clan-badge.mut {
@@ -989,6 +1029,15 @@
       font-size: 11px;
       color: var(--mut, #8b949e);
       font-style: italic;
+    }
+    @media (max-width: 960px) {
+      .bs-battle-layout {
+        flex-direction: column;
+      }
+      .bs-layout-sidebar {
+        width: 100%;
+        position: static;
+      }
     }
     .bs-outcome-banner {
       display: flex;
@@ -3283,8 +3332,10 @@
     const trainers = window.__pokesTrainers || [];
     let scopeHtml = `
       <div class="bs-scope-bar">
+        <div class="bs-scope-head">
+          <span class="bs-scope-lbl">🌐 Alcance de Cuentas:</span>
+        </div>
         <div class="bs-scope-chips" id="bsScopeChips">
-          <span style="font-size:11.5px;font-weight:600;color:var(--mut);user-select:none;margin-right:2px">Alcance:</span>
           <button class="bs-scope-chip${selectedBossScope === 'all' ? ' on' : ''}" data-scope="all">🌐 Todas las cuentas (Global)</button>
     `;
 
@@ -3299,9 +3350,6 @@
     });
 
     scopeHtml += `
-        </div>
-        <div class="bs-scope-tip">
-          <span>💡 Boss sin tipos elementales · Se aplican bonos de Clan (+15% ATK) y Held Items oficiales según su Tier</span>
         </div>
       </div>
     `;
@@ -3368,13 +3416,13 @@
       clanBarHtml = `
         <div class="bs-clan-bar">
           <div class="bs-clan-head">
-            <span class="bs-clan-lbl">🛡️ Bonus de Clan Activo (Simulación Global):</span>
-            <span class="bs-clan-sub">Solo se puede entrar a batalla con 1 clan a la vez. Selecciona cuál de tus clanes desbloqueados deseas activar (+15% ATK a los miembros de ese tipo):</span>
+            <span class="bs-clan-lbl">🛡️ Bonus de Clan Activo:</span>
+            <span class="bs-clan-sub">1 clan activo a la vez (+15% ATK):</span>
           </div>
           <div class="bs-clan-chips">
             ${clanChipsHtml}
           </div>
-          ${unlockedClans.length === 0 ? '<div class="bs-clan-empty-tip">ℹ️ No se detectaron clanes desbloqueados en tus cuentas vinculadas. Se simula con estadísticas puras.</div>' : ''}
+          ${unlockedClans.length === 0 ? '<div class="bs-clan-empty-tip">ℹ️ Sin clanes desbloqueados detectados.</div>' : ''}
         </div>
       `;
     } else {
@@ -3386,13 +3434,15 @@
 
       clanBarHtml = `
         <div class="bs-clan-bar">
-          <div class="bs-clan-fixed">
+          <div class="bs-clan-head">
             <span class="bs-clan-lbl">🛡️ Clan del Entrenador:</span>
+          </div>
+          <div class="bs-clan-fixed">
             ${cInfo ? `
               <span class="bs-clan-badge" style="border-color:${cInfo.color};color:${cInfo.color}">
                 <span>${cInfo.icon}</span>
                 <strong>Clan ${cInfo.name}</strong>
-                <span style="font-weight:400;opacity:0.85">(${cInfo.typesText}) · +15% ATK a sus tipos</span>
+                <span style="font-weight:400;opacity:0.85">(${cInfo.typesText}) · +15% ATK</span>
               </span>
             ` : `
               <span class="bs-clan-badge mut">🚫 Sin Clan asignado (0% bonus)</span>
@@ -3402,11 +3452,25 @@
       `;
     }
 
+    const tipBoxHtml = `
+      <div class="bs-scope-tip">
+        <span>💡 Boss sin tipos elementales · Se aplican bonos de Clan (+15% ATK) y Held Items oficiales según su Tier</span>
+      </div>
+    `;
     if (pool.length === 0) {
-      bodyContent.innerHTML = scopeHtml + clanBarHtml + `
-        <div class="pk-state-msg" style="padding:40px;display:flex;flex-direction:column;gap:8px">
-          <span>No se encontraron Pokémon disponibles para simular el combate.</span>
-          <span style="font-size:11.5px;color:var(--mut)">Asegúrate de que las cuentas tengan Pokémon cargados o pulsa "Re-analizar".</span>
+      bodyContent.innerHTML = `
+        <div class="bs-battle-layout">
+          <div class="bs-layout-sidebar">
+            ${scopeHtml}
+            ${clanBarHtml}
+            ${tipBoxHtml}
+          </div>
+          <div class="bs-layout-main">
+            <div class="pk-state-msg" style="padding:40px;display:flex;flex-direction:column;gap:8px">
+              <span>No se encontraron Pokémon disponibles para simular el combate.</span>
+              <span style="font-size:11.5px;color:var(--mut)">Asegúrate de que las cuentas tengan Pokémon cargados o pulsa "Re-analizar".</span>
+            </div>
+          </div>
         </div>
       `;
       window.bindBossScopeEvents(ov);
@@ -3641,7 +3705,20 @@
     });
     teamHtml += `</div>`;
 
-    bodyContent.innerHTML = scopeHtml + clanBarHtml + outcomeHtml + hpBarHtml + teamHtml;
+    bodyContent.innerHTML = `
+      <div class="bs-battle-layout">
+        <div class="bs-layout-sidebar">
+          ${scopeHtml}
+          ${clanBarHtml}
+          ${tipBoxHtml}
+        </div>
+        <div class="bs-layout-main">
+          ${outcomeHtml}
+          ${hpBarHtml}
+          ${teamHtml}
+        </div>
+      </div>
+    `;
     window.bindBossScopeEvents(ov);
   };
 
