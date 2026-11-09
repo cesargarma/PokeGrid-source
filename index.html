@@ -2872,6 +2872,10 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
       const wasOpen = oldOv && oldOv.classList.contains('show');
       if (oldOv) oldOv.remove();
 
+      const oldBosses = document.getElementById('bossesOverlay');
+      const bossesWasOpen = oldBosses && oldBosses.classList.contains('show');
+      if (oldBosses) oldBosses.remove();
+
       const s = document.createElement('script');
       s.id = 'pgCustomScript';
       s.src = 'src/custom-ui.js?_t=' + Date.now();
@@ -2879,7 +2883,9 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
         if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
         refreshStats();
         if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+        if (typeof window.mountBossesButton === 'function') window.mountBossesButton();
         if (wasOpen && typeof window.openPokesModal === 'function') window.openPokesModal();
+        if (bossesWasOpen && typeof window.openBossesModal === 'function') window.openBossesModal();
       };
       s.onerror = () => {
         const s2 = document.createElement('script');
@@ -2889,7 +2895,9 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
           if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
           refreshStats();
           if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+          if (typeof window.mountBossesButton === 'function') window.mountBossesButton();
           if (wasOpen && typeof window.openPokesModal === 'function') window.openPokesModal();
+          if (bossesWasOpen && typeof window.openBossesModal === 'function') window.openBossesModal();
         };
         document.body.appendChild(s2);
       };

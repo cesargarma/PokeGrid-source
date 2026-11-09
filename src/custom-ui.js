@@ -2509,8 +2509,8 @@
       level: 600,
       look: 3348,
       dexId: 73,
-      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png',
-      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png',
+      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png',
+      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png',
       types: ['AGUA', 'VENENO'],
       hp: 4200000,
       atk: 1450,
@@ -2535,8 +2535,8 @@
       level: 500,
       look: 8451,
       dexId: 142,
-      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png',
-      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png',
+      avatar: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png',
+      avatarFallback: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png',
       types: ['ROCA', 'VOLADOR'],
       hp: 2300000,
       atk: 1520,
@@ -2776,6 +2776,12 @@
 
   window.initBossesModal = function() {
     let ov = document.getElementById('bossesOverlay');
+    // Si ya existe pero tiene imágenes obsoletas de creatures/ o estructura previa, purgarlo
+    if (ov && (ov.querySelector('img[src*="assets/creatures"]') || ov.querySelector('img[src*="assets/sprites"]') || !ov.querySelector('#bsTabsBar'))) {
+      const wasOpen = ov.classList.contains('show');
+      ov.remove();
+      ov = null;
+    }
     if (ov && ov.querySelector('#bsTabsBar')) return ov;
     const wasOpen = ov && ov.classList.contains('show');
     if (ov) ov.remove();
@@ -2804,7 +2810,7 @@
         <div class="bs-boss-selector" id="bsBossSelector">
           <div class="bs-boss-card on" data-boss="cruel">
             <div class="bs-boss-avatar">
-              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png';this.onerror=null;" alt="Giant Cruel">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/73.png" onerror="if(this.src!=='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png'){this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/73.png';}else{this.style.opacity='0.4';}" alt="Giant Cruel">
             </div>
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
@@ -2817,7 +2823,7 @@
 
           <div class="bs-boss-card" data-boss="aerodactyl2">
             <div class="bs-boss-avatar">
-              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png';this.onerror=null;" alt="Ancient Aero">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/142.png" onerror="if(this.src!=='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png'){this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/142.png';}else{this.style.opacity='0.4';}" alt="Ancient Aero">
             </div>
             <div class="bs-boss-info">
               <div class="bs-boss-name-row">
@@ -2933,9 +2939,27 @@
     const badge = ov.querySelector('#bsBossBadge');
     if (badge) badge.textContent = boss.name + ' (Nv. ' + boss.level + ')';
 
-    // Boss selector active state
+    // Boss selector active state y actualización forzosa de avatares
     ov.querySelectorAll('.bs-boss-card').forEach(c => {
-      c.classList.toggle('on', c.getAttribute('data-boss') === boss.id);
+      const bId = c.getAttribute('data-boss');
+      c.classList.toggle('on', bId === boss.id);
+      const bConf = BOSSES_CONFIG[bId];
+      if (bConf) {
+        const img = c.querySelector('.bs-boss-avatar img');
+        if (img) {
+          const expected = bConf.avatar;
+          if (!img.src || img.src.includes('assets/creatures') || img.src.includes('assets/sprites') || img.src.includes('other/official-artwork')) {
+            img.src = expected;
+            img.onerror = function() {
+              if (this.src !== bConf.avatarFallback) {
+                this.src = bConf.avatarFallback;
+              } else {
+                this.style.opacity = '0.4';
+              }
+            };
+          }
+        }
+      }
     });
 
     // Tab buttons active state
@@ -3130,9 +3154,12 @@
 
     const hpBarHtml = `
       <div class="bs-hp-wrapper">
-        <div class="bs-hp-head">
-          <span>Vida de ${boss.name} (${boss.hp.toLocaleString()} HP)</span>
-          <span>Daño infligido: ${(boss.hp - battleResult.remainingBossHp).toLocaleString()} HP (${battleResult.bossHpPctDepleted}%) · Tiempo: ${totalTimeText}</span>
+        <div class="bs-hp-head" style="display:flex;align-items:center;gap:10px">
+          <img src="${boss.avatar}" onerror="this.src='${boss.avatarFallback}';this.onerror=null;" alt="${boss.name}" style="width:26px;height:26px;object-fit:contain;image-rendering:pixelated;flex:none;border-radius:4px;background:rgba(0,0,0,0.3)">
+          <div style="flex:1;display:flex;justify-content:space-between;align-items:center;min-width:0">
+            <span>Vida de ${boss.name} (${boss.hp.toLocaleString()} HP)</span>
+            <span>Daño infligido: ${(boss.hp - battleResult.remainingBossHp).toLocaleString()} HP (${battleResult.bossHpPctDepleted}%) · Tiempo: ${totalTimeText}</span>
+          </div>
         </div>
         <div class="bs-hp-track">
           ${hpBarSegs}
@@ -3396,6 +3423,7 @@
           const oldPokes = document.getElementById('pokesOverlay');
           if (oldPokes) oldPokes.remove();
           const oldBosses = document.getElementById('bossesOverlay');
+          const wasBossesOpen = oldBosses && oldBosses.classList.contains('show');
           if (oldBosses) oldBosses.remove();
 
           window.CUSTOM_COLUMNS = true;
@@ -3412,6 +3440,7 @@
             if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
             if (typeof window.mountBossesButton === 'function') window.mountBossesButton();
             if (typeof window.enhanceInvCard === 'function') window.enhanceInvCard();
+            if (wasBossesOpen && typeof window.openBossesModal === 'function') window.openBossesModal();
           };
 
           const s = document.createElement('script');
@@ -3453,7 +3482,7 @@
     }
   });
 
-  // Reconstruir overlay viejo si existe en el DOM
+  // Reconstruir overlays viejos si existen en el DOM
   try {
     const existingPokesOv = document.getElementById('pokesOverlay');
     if (existingPokesOv && !existingPokesOv.querySelector('#pkPresetsBar')) {
@@ -3464,6 +3493,16 @@
         freshOv.classList.add('show');
         window.updatePresetPills();
         window.renderPokesTable();
+      }
+    }
+    const existingBossesOv = document.getElementById('bossesOverlay');
+    if (existingBossesOv) {
+      const wasBossesOpen = existingBossesOv.classList.contains('show');
+      existingBossesOv.remove();
+      const freshBossOv = window.initBossesModal();
+      if (wasBossesOpen) {
+        freshBossOv.classList.add('show');
+        window.renderBossesModal();
       }
     }
   } catch {}
