@@ -9,14 +9,6 @@
     }
   } catch {}
 
-  // Asegurar que cdInvF no mantenga un filtro estricto que destruya los elementos en SB.inv
-  try {
-    const lastF = localStorage.getItem('cdInvF');
-    if (lastF) {
-      window.__invFilterSaved = lastF;
-      localStorage.setItem('cdInvF', '');
-    }
-  } catch {}
 
   // Estilos personalizados
   window.setCustomStyle = function(css) {
@@ -1555,31 +1547,31 @@
     try { invFavs = JSON.parse(localStorage.getItem('invFavs') || '{}'); } catch {}
 
     const inp = invIt.querySelector('#cdInvF');
-    const filterText = (inp ? inp.value : '').trim().toLowerCase();
+    const savedFilter = (localStorage.getItem('cdInvF') || '').trim().slice(0, 30);
+    if (inp && !inp.value && savedFilter && document.activeElement !== inp) {
+      inp.value = savedFilter;
+    }
+    const filterText = (inp ? inp.value : savedFilter).trim().toLowerCase();
 
-    // Interceptar input, enter y change en cdInvF para que nunca limpie la lista de favoritos
+    // Sincronizar input y eventos en cdInvF sin borrar cdInvF
     if (inp && !inp.__hasFavIntercept) {
       inp.__hasFavIntercept = true;
-      inp.onkeydown = function(e) {
+      inp.addEventListener('input', function() {
+        const val = inp.value.trim().slice(0, 30);
+        try { localStorage.setItem('cdInvF', val); } catch {}
+        try { if (typeof lsSet === 'function') lsSet('cdInvF', val); } catch {}
+        window.enhanceInvCard();
+      });
+      inp.addEventListener('change', function() {
+        const val = inp.value.trim().slice(0, 30);
+        try { localStorage.setItem('cdInvF', val); } catch {}
+        try { if (typeof lsSet === 'function') lsSet('cdInvF', val); } catch {}
+      });
+      inp.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
-          e.preventDefault();
-          e.stopPropagation();
           inp.blur();
-          try { localStorage.setItem('cdInvF', ''); } catch {}
-          window.enhanceInvCard();
         }
-      };
-      inp.onchange = function(e) {
-        if (e) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-        }
-        try { localStorage.setItem('cdInvF', ''); } catch {}
-        window.enhanceInvCard();
-      };
-      inp.oninput = function() {
-        window.enhanceInvCard();
-      };
+      });
     }
 
     // Buscar contenedor de filas
@@ -1669,15 +1661,26 @@
 
         star.onclick = (e) => {
           e.stopPropagation();
-          if (invFavs[id] || (nameText && invFavs[nameText.toLowerCase()])) {
-            delete invFavs[id];
-            if (nameText) delete invFavs[nameText.toLowerCase()];
+          let currentFavs = {};
+          try { currentFavs = JSON.parse(localStorage.getItem('invFavs') || '{}'); } catch {}
+          if (currentFavs[id] || (nameText && currentFavs[nameText.toLowerCase()])) {
+            delete currentFavs[id];
+            if (nameText) delete currentFavs[nameText.toLowerCase()];
           } else {
-            invFavs[id] = nameText || 1;
+            currentFavs[id] = nameText || 1;
           }
-          try { localStorage.setItem('invFavs', JSON.stringify(invFavs)); } catch {}
-          try { localStorage.setItem('cdInvF', ''); } catch {}
-          window.enhanceInvCard();
+          try { localStorage.setItem('invFavs', JSON.stringify(currentFavs)); } catch {}
+          try { if (typeof lsSet === 'function') lsSet('invFavs', JSON.stringify(currentFavs)); } catch {}
+          if (window.__invFavsRef) {
+            for (const k in window.__invFavsRef) delete window.__invFavsRef[k];
+            Object.assign(window.__invFavsRef, currentFavs);
+          }
+          if (typeof cdHtmlAnt !== 'undefined') cdHtmlAnt = '';
+          if (typeof refreshCards === 'function') {
+            refreshCards(true);
+          } else {
+            window.enhanceInvCard();
+          }
         };
 
         // Filtro de búsqueda:
@@ -1704,15 +1707,17 @@
           sep.className = 'cd-fav-sep';
           sep.innerHTML = '<span class="cd-fav-sep-line left"></span><span class="cd-fav-sep-text"></span><span class="cd-fav-sep-line right"></span>';
         }
-        const textEl = sep.querySelector('.cd-fav-sep-text');
-        if (filterText) {
-          if (visibleNonFavs.length > 0) {
-            textEl.textContent = 'Resultados (' + visibleNonFavs.length + ')';
+        let textEl = sep.querySelector('.cd-fav-sep-text') || (sep.children && sep.children[1]) || (sep.childNodes && sep.childNodes[1]) || sep.querySelector('span:nth-child(2)');
+        if (textEl) {
+          if (filterText) {
+            if (visibleNonFavs.length > 0) {
+              textEl.textContent = 'Resultados (' + visibleNonFavs.length + ')';
+            } else {
+              textEl.textContent = 'Sin otros resultados para "' + filterText + '"';
+            }
           } else {
-            textEl.textContent = 'Sin otros resultados para "' + filterText + '"';
+            textEl.textContent = 'Otros ítems (' + nonFavRows.length + ')';
           }
-        } else {
-          textEl.textContent = 'Otros ítems (' + nonFavRows.length + ')';
         }
         sep.style.display = '';
       } else if (sep) {
@@ -1736,7 +1741,7 @@
         container.appendChild(pe.parentNode);
       }
     } finally {
-      setTimeout(() => { isEnhancing = false; }, 30);
+      isEnhancing = false;
     }
   };
 
@@ -3992,7 +3997,7 @@
       window.__cardsInvObserver = new MutationObserver(() => {
         if (!isEnhancing) window.enhanceInvCard();
       });
-      window.__cardsInvObserver.observe(cards, { childList: true, subtree: true });
+      window.__cardsInvObserver.observe(cards, { childList: true, subtree: false });
     }
 
     const topbar = document.getElementById('topbar');
