@@ -918,10 +918,13 @@
   // Construir o inyectar modal en el DOM
   window.initPokesModal = function() {
     let ov = document.getElementById('pokesOverlay');
-    if (ov) return ov;
+    if (ov && ov.querySelector('#pkPresetsBar')) return ov;
+    const wasOpen = ov && ov.classList.contains('show');
+    if (ov) ov.remove();
 
     ov = document.createElement('div');
     ov.id = 'pokesOverlay';
+    if (wasOpen) ov.classList.add('show');
     ov.innerHTML = `
       <div id="pokesModal">
         <div class="pk-hd">
@@ -1073,6 +1076,8 @@
     ov.classList.add('show');
     const pokesBtn = document.getElementById('pokesBtn');
     if (pokesBtn) pokesBtn.classList.add('on');
+    window.updatePresetPills();
+    window.renderPokesTable();
     window.fetchPokes300();
   };
 
@@ -1639,12 +1644,25 @@
 
   // Botón en la barra superior (topbar)
   window.mountPokesButton = function() {
-    if (document.getElementById('pokesBtn')) return;
     const topbar = document.getElementById('topbar');
     if (!topbar) return;
 
+    let btn = document.getElementById('pokesBtn');
+    if (btn) {
+      btn.title = 'Pokémon\nVer Pokémon de todas las cuentas con filtros rápidos (Nv 300+, En Equipo, IV 160+, Épicas, Dittos, etc.)';
+      btn.onclick = () => {
+        const ov = document.getElementById('pokesOverlay');
+        if (ov && ov.classList.contains('show')) {
+          window.closePokesModal();
+        } else {
+          window.openPokesModal();
+        }
+      };
+      return;
+    }
+
     const target = document.getElementById('ocBtn') || document.getElementById('ivsBtn');
-    const btn = document.createElement('button');
+    btn = document.createElement('button');
     btn.id = 'pokesBtn';
     btn.title = 'Pokémon\nVer Pokémon de todas las cuentas con filtros rápidos (Nv 300+, En Equipo, IV 160+, Épicas, Dittos, etc.)';
     btn.setAttribute('aria-label', 'Pokémon');
@@ -1683,6 +1701,55 @@
     }
   };
 
+  // Re-enlazar botón "Refrescar UI" para garantizar recarga con cache-busting y limpieza de modals
+  const setupReloadUi = function() {
+    const btn = document.getElementById('reloadUi');
+    if (btn && !btn.__customReloadBound) {
+      btn.__customReloadBound = true;
+      btn.onclick = (e) => {
+        if (e && e.shiftKey) {
+          location.reload();
+          return;
+        }
+        try {
+          const oldScript = document.getElementById('pgCustomScript');
+          if (oldScript) oldScript.remove();
+          const oldPokes = document.getElementById('pokesOverlay');
+          if (oldPokes) oldPokes.remove();
+
+          const s = document.createElement('script');
+          s.id = 'pgCustomScript';
+          s.src = 'src/custom-ui.js?_t=' + Date.now();
+          s.onload = () => {
+            if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
+              cdHtmlAnt = '';
+              refreshCards(true);
+            }
+            if (typeof refreshStats === 'function') refreshStats();
+            if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+          };
+          s.onerror = () => {
+            const s2 = document.createElement('script');
+            s2.id = 'pgCustomScript';
+            s2.src = 'src/custom-ui.js';
+            s2.onload = () => {
+              if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
+                cdHtmlAnt = '';
+                refreshCards(true);
+              }
+              if (typeof refreshStats === 'function') refreshStats();
+              if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+            };
+            document.body.appendChild(s2);
+          };
+          document.body.appendChild(s);
+        } catch (err) {
+          console.error('Error al refrescar UI:', err);
+        }
+      };
+    }
+  };
+
   // Tecla Escape cierra modal de Pokémon si está abierto
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1693,10 +1760,26 @@
     }
   });
 
+  // Reconstruir overlay viejo si existe en el DOM
+  try {
+    const existingPokesOv = document.getElementById('pokesOverlay');
+    if (existingPokesOv && !existingPokesOv.querySelector('#pkPresetsBar')) {
+      const wasOpen = existingPokesOv.classList.contains('show');
+      existingPokesOv.remove();
+      const freshOv = window.initPokesModal();
+      if (wasOpen) {
+        freshOv.classList.add('show');
+        window.updatePresetPills();
+        window.renderPokesTable();
+      }
+    }
+  } catch {}
+
   // Ejecución inicial y observación de cambios en el contenedor de cards y topbar
   setTimeout(() => {
     window.mountPokesButton();
     window.enhanceInvCard();
+    setupReloadUi();
 
     const cards = document.getElementById('cards');
     if (cards && !window.__cardsInvObserver) {
@@ -1710,6 +1793,7 @@
     if (topbar && !window.__topbarPokesObserver) {
       window.__topbarPokesObserver = new MutationObserver(() => {
         window.mountPokesButton();
+        setupReloadUi();
       });
       window.__topbarPokesObserver.observe(topbar, { childList: true });
     }

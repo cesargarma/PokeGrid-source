@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: https://poke.idleworld.online https://raw.githubusercontent.com; font-src 'self' data:; connect-src https://api.github.com/repos/soufoka/PokeGrid/releases/latest; frame-src https://poke.idleworld.online; child-src https://poke.idleworld.online; base-uri 'none'; form-action 'none'">
 <title>PokeGrid</title>
 <script src="src/domain/iv-math.js"></script>
-<script src="src/custom-ui.js"></script>
+<script src="src/custom-ui.js" id="pgCustomScript"></script>
 <style>
   /* Cores do app (redesign B): cada uma com um significado so. Neutros; marca e botao principal (vermelho so pra marca,
      principal e erro); estados (ok = ligado/positivo, av = aviso em ambar, nunca o dourado do gold, er = erro) com o tom de
@@ -2868,16 +2868,30 @@ lw:!!(window.__loginWatch||window.document?.querySelector('input[autocomplete=on
     try {
       const old = document.getElementById('pgCustomScript');
       if (old) old.remove();
+      const oldOv = document.getElementById('pokesOverlay');
+      const wasOpen = oldOv && oldOv.classList.contains('show');
+      if (oldOv) oldOv.remove();
+
       const s = document.createElement('script');
       s.id = 'pgCustomScript';
-      s.src = 'src/custom-ui.js';
+      s.src = 'src/custom-ui.js?_t=' + Date.now();
       s.onload = () => {
         if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
         refreshStats();
+        if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+        if (wasOpen && typeof window.openPokesModal === 'function') window.openPokesModal();
       };
       s.onerror = () => {
-        if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
-        refreshStats();
+        const s2 = document.createElement('script');
+        s2.id = 'pgCustomScript';
+        s2.src = 'src/custom-ui.js';
+        s2.onload = () => {
+          if (cardsOn) { cdHtmlAnt = ''; refreshCards(true); }
+          refreshStats();
+          if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
+          if (wasOpen && typeof window.openPokesModal === 'function') window.openPokesModal();
+        };
+        document.body.appendChild(s2);
       };
       document.body.appendChild(s);
     } catch {
