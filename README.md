@@ -2,33 +2,36 @@
 
 <img src="tray.png" width="72" alt="PokeGrid">
 
-# PokeGrid
+# PokeGrid (Extended Edition)
 
-**Quatro contas de Poke Idle World em uma janela só.**
+**Hasta cuatro cuentas de Poke Idle World en una sola ventana, con herramientas analíticas avanzadas.**
 
 ![Plataforma](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
-[![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
+[![Licencia](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
 
 [English](README.en.md)
 
-<img src="docs/modo-simples.png" width="880" alt="Modo Simples: painel com os números das quatro contas">
+<img src="docs/modo-simples.png" width="880" alt="Modo Simple: panel con las métricas de las cuatro cuentas">
 
-<sub>Modo Simples: esconde o jogo e mostra só os números. Cada seção pode ser movida e redimensionada.</sub>
+<sub>Modo Simple: oculta el juego para minimizar el uso de CPU y muestra métricas detalladas en tiempo real. Cada sección se puede mover y redimensionar.</sub>
 
 </div>
 
-> Esta é a versão que roda a partir do código. Não tem executável pronto pra baixar: você pega o código, olha o que ele faz e roda você mesmo. Assim a confiança fica com você, não comigo.
+> ℹ️ **Fork Mejorado:** Este proyecto es un fork de [PokeGrid-source](https://github.com/soufoka/PokeGrid-source) desarrollado originalmente por [soufoka](https://github.com/soufoka). Mantiene toda la arquitectura segura, ligera y modular del proyecto original, incorporando una suite exclusiva de herramientas avanzadas: Simulador y Optimizador de Bosses, Explorador Global de Pokémon multicuenta, cálculo de progreso de EXP y tiempo de Lvl Up, Inventario inteligente con favoritos persistentes y tarjeta modular de consumibles.
 
-> 🔰 **Nunca mexeu com isso?** Tem um passo a passo pra leigo aqui: **[TUTORIAL.md](TUTORIAL.md)** (ou o arquivo `COMO USAR.txt` dentro da pasta).
+> Esta es la versión que se ejecuta directamente desde el código fuente. No hay ejecutables opacos: descargas el código, puedes auditar exactamente lo que hace y ejecutarlo tú mismo con total confianza y transparencia.
 
-> ### 🔒 Seus dados de login ficam só no seu computador
-> Login e senha são criptografados no seu próprio PC e nunca saem dele. Nada de servidor, nada de repositório. O código está todo aqui pra você conferir.
+> 🔰 **¿Primera vez usándolo?** Tienes una guía paso a paso aquí: **[TUTORIAL.md](TUTORIAL.md)** (o en el archivo `COMO USAR.txt` dentro de la carpeta).
 
-## O que é
+> ### 🔒 Tus datos de acceso permanecen únicamente en tu ordenador
+> Los nombres de usuario y contraseñas se almacenan cifrados en tu propio PC utilizando el sistema seguro de Electron (`safeStorage` / DPAPI en Windows) y nunca salen de él. Sin servidores externos, sin telemetría ni repositorios remotos.
 
-Quatro contas rodando ao mesmo tempo, cada uma no seu quadrante e com sessão separada. Você salva o login uma vez e o app entra sozinho nas próximas. Se a sessão cair no meio do farm, ele loga de novo sem você precisar estar por perto. Ele não automatiza o jogo nem toca no captcha, só organiza as contas que você já tem.
+## ¿Qué es PokeGrid?
 
+PokeGrid permite ejecutar hasta cuatro cuentas de Poke Idle World de forma simultánea, cada una en su propio cuadrante y con sesión totalmente independiente. Guardas las credenciales una sola vez y la aplicación inicia sesión automáticamente en cada inicio. Si una sesión se interrumpe durante el farmeo (caídas de red, reinicios del servidor), el gestor reconecta automáticamente sin necesidad de que estés pendiente frente a la pantalla.
+
+*No automatiza acciones dentro del juego ni resuelve captchas:* únicamente organiza, protege y optimiza el rendimiento de tus cuentas existentes.
 
 ## 🚀 Novedades y Mejoras Exclusivas
 
@@ -110,63 +113,68 @@ Navegación cómoda y fluida sin interferir con las partidas en ejecución.
 
 ---
 
-## Como rodar
+## Cómo ejecutar
 
-Você precisa do Node.js instalado uma vez. Depois é rápido.
+Solo necesitas tener Node.js instalado una vez. A partir de ahí es inmediato.
 
-**1. Instale o Node.js**
-Baixe a versão LTS em [nodejs.org](https://nodejs.org) e instale (é next, next, finish).
+**1. Instala Node.js**  
+Descarga la versión LTS desde [nodejs.org](https://nodejs.org) e instálala con las opciones por defecto.
 
-**2. Baixe este código**
-Clique no botão verde **Code** aqui em cima e depois em **Download ZIP**. Extraia a pasta onde quiser. Quem usa Git pode clonar:
+**2. Descarga este repositorio**  
+Haz clic en el botón verde **Code** arriba a la derecha y pulsa **Download ZIP**, o clona mediante Git:
 
 ```bash
-git clone https://github.com/soufoka/PokeGrid-source.git
+git clone https://github.com/cesargarma/PokeGrid-source.git
 ```
 
-**3. Abra o app**
-No Windows, dê dois cliques no arquivo **Abrir PokeGrid** (`.bat`) dentro da pasta. Na primeira vez ele instala o necessário numa janela preta e abre o app; nas próximas a janela só pisca e o app abre na hora. Quer um atalho? Botão direito nele, **Enviar para: Área de trabalho (criar atalho)**.
-
-Também dá pra usar o **iniciar.bat**, mas ele mantém uma janela preta aberta e, se ela for fechada, o app fecha junto.
-
-No macOS ou Linux, abra o terminal na pasta e rode:
+**3. Inicia la aplicación**  
+- **En Windows:** Haz doble clic en el archivo **Abrir PokeGrid** (`.bat`) en la raíz de la carpeta. La primera vez instalará automáticamente las dependencias necesarias y abrirá la aplicación; en las siguientes aperturas iniciará de forma instantánea. Puedes crear un acceso directo en tu Escritorio haciendo clic derecho -> **Enviar a: Escritorio (crear acceso directo)**.
+- También dispones de **iniciar.bat**, el cual mantiene la consola de comandos abierta mientras se ejecute.
+- **En macOS o Linux:** Abre una terminal en la carpeta del proyecto y ejecuta:
 
 ```bash
 bash iniciar.sh
 ```
 
-Pronto. Entre ou crie uma conta em cada painel e, em "Treinadores", salve o login. Da próxima vez ele entra sozinho.
+Una vez abierta la interfaz, inicia sesión con tus cuentas en cada cuadrante y guárdalas en el menú "Treinadores" (Entrenadores) para que inicien automáticamente en el futuro.
 
-## Documentação
+## Documentación
 
-| | |
+| Enlace | Descripción |
 |---|---|
-| **[Manual](MANUAL.md)** | O que cada botão e cada seção faz, em linguagem simples |
-| **[FAQ](FAQ.md)** | Dúvidas frequentes: atualizar sem perder nada, pokébola sumida, scripts, planilhas |
-| **[Tutorial](TUTORIAL.md)** | Passo a passo pra rodar a versão sem instalador |
-| **[Mudanças](CHANGELOG.md)** | O que entrou em cada versão |
+| **[Manual](MANUAL.md)** | Guía detallada de cada botón, panel y sección |
+| **[FAQ](FAQ.md)** | Preguntas frecuentes: actualizaciones sin perder datos, scripts, resolución de incidencias |
+| **[Tutorial](TUTORIAL.md)** | Guía paso a paso para usuarios sin experiencia técnica |
+| **[Cambios](CHANGELOG.md)** | Historial de versiones y notas de desarrollo |
 
-## O que ele faz
+## Funcionalidades principales
 
-- Rode de 1 a 4 contas, você escolhe quantos painéis abrir.
-- Login automático, mesmo quando a sessão expira no meio do farm.
-- Modo Eco que segura o uso de CPU sem atrapalhar o progresso.
-- Esconde o chat e o menu de ícones do jogo pra sobrar tela.
-- Avisa quando aparece shiny, uma conta cai, para de farmar ou fica sem suprimento, no Windows e no Discord.
-- Liga e desliga cada painel, zoom, tela cheia e atalhos de teclado.
-- Bandeja, iniciar junto com o Windows e idioma português, inglês ou espanhol.
+- **Control multicuenta flexible**: Ejecuta de 1 a 4 cuentas de forma independiente según tus necesidades.
+- **Auto-login persistente**: Reconexión automática transparente ante desconexiones o expiraciones de sesión.
+- **Modo Eco inteligente**: Reduce el consumo de CPU y GPU ralentizando el renderizado sin perjudicar el ritmo de captura y farmeo.
+- **Optimización de pantalla**: Oculta el chat y los menús de la interfaz web del juego para maximizar el área visible.
+- **Sistema de alertas sonoras y webhook**: Notificaciones instantáneas al encontrar shinies, caídas de cuenta o falta de suministros, tanto en Windows como vía Discord Webhooks.
+- **Control granular**: Controles de zoom, pantalla completa, silenciado selectivo y atajos de teclado rápidos.
+- **Integración con el sistema**: Bandeja del sistema (tray), inicio con Windows y soporte multilingüe (español, inglés y portugués).
 
-## Segurança
+## Seguridad y Privacidad
 
-- As senhas são criptografadas pelo `safeStorage` do Electron, que usa a API do sistema (DPAPI no Windows). Nunca saem do PC.
-- Os painéis ficam presos ao domínio do jogo. Link externo abre no seu navegador, e a senha só é digitada na tela de login oficial.
-- Câmera, microfone, localização e notificações do jogo ficam bloqueados.
-- O captcha é sempre você que resolve. O app preenche e aperta Entrar quando você marca a caixinha, mas nunca toca no "Confirme que é humano". Burlar detecção de bot não é a proposta.
+- **Cifrado local seguro**: Las contraseñas están protegidas por la API nativa del sistema operativo a través de `safeStorage` de Electron (DPAPI en Windows). Nunca se transmiten fuera de tu máquina.
+- **Sandboxing de paneles**: Las sesiones están estrictamente restringidas al dominio del juego. Cualquier enlace externo se abre en tu navegador predeterminado y las credenciales solo interactúan con los formularios legítimos de login.
+- **Permisos restringidos**: Cámara, micrófono, geolocalización y notificaciones del navegador web permanecen bloqueados.
+- **Captcha 100% manual**: PokeGrid rellena tus credenciales guardadas, pero nunca resuelve ni elude las verificaciones anti-bot ("Confirma que eres humano"). La resolución de captchas siempre es potestad del usuario.
 
-## Por dentro
+## Arquitectura interna
 
-Cada painel é um `<webview>` do Electron com partição própria (`persist:conta1` até `conta4`), e é isso que mantém as contas isoladas e logadas entre aberturas. O que o jogo não oferece, o app injeta em cada painel: o Eco troca o `requestAnimationFrame` por uma versão mais lenta, o login preenche pelo setter nativo do input, e o menu e o chat somem via CSS com um `MutationObserver`. Está tudo em `main.js`, `preload.js` e `index.html`, sem nada escondido.
+Cada cuadrante se ejecuta en un `<webview>` independiente de Electron con su propia partición aislada (`persist:conta1` a `persist:conta4`), garantizando que las cookies y el almacenamiento local permanezcan estancos. 
 
-## Licença
+La capa de extensión en vivo `src/custom-ui.js` inyecta de forma dinámica las mejoras visuales, tablas interactivas y modales analíticos sin alterar el núcleo de Electron, permitiendo recargar la interfaz en caliente sin cerrar ni reiniciar las partidas en curso.
 
-MIT. Projeto independente, sem ligação com o Poke Idle World.
+## Créditos y Reconocimientos
+
+- **Proyecto Original**: Este software es un fork mejorado de **[PokeGrid](https://github.com/soufoka/PokeGrid-source)**, creado por **[soufoka](https://github.com/soufoka)**. Agradecemos su excelente trabajo en la concepción y arquitectura base de la aplicación.
+- **Fork y Extensiones**: Desarrollado y mantenido por **[cesargarma](https://github.com/cesargarma/PokeGrid-source)** con nuevas herramientas de combate, optimización de equipo, inventario inteligente y análisis multicuenta.
+
+## Licencia
+
+Distribuido bajo licencia MIT. Proyecto independiente sin afiliación oficial con Pokémon ni Poke Idle World.

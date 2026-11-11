@@ -2,31 +2,36 @@
 
 <img src="tray.png" width="72" alt="PokeGrid">
 
-# PokeGrid
+# PokeGrid (Extended Edition)
 
-**Four Poke Idle World accounts in a single window.**
+**Up to four Poke Idle World accounts in a single window, with advanced analytical tools.**
 
 ![Platform](https://img.shields.io/badge/Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-0078D6)
 ![Electron](https://img.shields.io/badge/Electron-43-47848F)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[Português](README.md)
+[Español](README.md)
 
 <img src="docs/modo-simples.png" width="880" alt="Simple mode: dashboard with the numbers of all four accounts">
 
-<sub>Simple mode: hides the game and shows only the numbers. Every section can be moved and resized.</sub>
+<sub>Simple mode: hides the game to reduce CPU usage and displays real-time metrics. Every section can be moved and resized.</sub>
 
 </div>
 
-> This is the run-from-source version. There is no ready-made executable to download: you grab the code, look at what it does and run it yourself. That way the trust is on you, not on me.
+> ℹ️ **Enhanced Fork:** This project is a fork of [PokeGrid-source](https://github.com/soufoka/PokeGrid-source) created by [soufoka](https://github.com/soufoka). It preserves the lightweight, safe and modular architecture of the original software while introducing an exclusive analytical suite: Boss Simulator & Team Optimizer, Global Multi-Account Pokémon Explorer, real-time EXP % and Lvl Up projections, Smart Inventory with pinned favorites, and modular supplies tracking.
+
+> This is the run-from-source version. There is no opaque executable: you download the code, audit exactly what it does, and run it yourself with full transparency.
+
+> 🔰 **First time running it?** Check out the step-by-step guide: **[TUTORIAL.md](TUTORIAL.md)** (or the `COMO USAR.txt` file inside the folder).
 
 > ### 🔒 Your login data stays only on your computer
-> Login and password are encrypted on your own PC and never leave it. No server, no repository. The whole code is here for you to check.
+> Usernames and passwords are encrypted on your local PC using Electron's secure `safeStorage` API (DPAPI on Windows) and never leave your machine. No external servers, no telemetry, no remote repositories.
 
-## What it is
+## What is PokeGrid?
 
-Four accounts running at once, each in its own quadrant with a separate session. You save the login once and the app signs in on its own from then on. If a session drops mid farm, it logs back in without you being around. It does not automate the game or touch the captcha, it only organizes the accounts you already have.
+Four accounts running at once, each in its own quadrant with a completely isolated session. You save the login once and the app signs in automatically on every launch. If a session drops mid farm (network drops, server restarts), the manager reconnects automatically without requiring you to sit in front of the screen.
 
+*It does not automate in-game actions or solve captchas:* it only organizes, protects, and optimizes the performance of your existing accounts.
 
 ## 🚀 Exclusive New Features & Enhancements
 
@@ -44,7 +49,7 @@ Simulates full battles against world bosses (**Giant Cruel**, **Ancient Aero**, 
   - **Configuration Sidebar**: Scope selection ("All accounts" Global mode or individual trainer), dynamic Clan Bonus selector (+15% ATK) with official elemental affinities (Orebound, Seavell, Psycraft, Malefic, Naturia, etc.), and official Held Item badges.
   - **Main Combat Dashboard**: Battle outcome banner (Victory or Defeat with boss remaining HP), segmented multi-color health bar, and 1 Pokémon per row display with 2x2 combat metrics and rightmost prominent % boss damage box.
 - **Official Held Items Calibrated by Tiers**: Full calibration of official game Held Item tiers (Tiers 1 to 8 for X-Attack, X-Defense, X-Vitality, X-Boost, Critical, Block, Experience, and Lucky).
-- **Automatic Team Optimization**: Analyzes all Pokémon across all your accounts and automatically suggests the optimal 6-member team.
+- **Automatic Team Optimization**: Analyzes all Pokémon across all your accounts and automatically suggests the optimal 6-member team to defeat the boss.
 
 ---
 
@@ -112,59 +117,64 @@ Smooth navigation without interrupting running game sessions.
 
 You need Node.js installed once. After that it is quick.
 
-**1. Install Node.js**
-Download the LTS version at [nodejs.org](https://nodejs.org) and install it (just next, next, finish).
+**1. Install Node.js**  
+Download the LTS version at [nodejs.org](https://nodejs.org) and install it.
 
-**2. Download this code**
-Click the green **Code** button above, then **Download ZIP**. Extract the folder wherever you want. If you use Git, clone it:
+**2. Download this code**  
+Click the green **Code** button above and then **Download ZIP**, or clone using Git:
 
 ```bash
-git clone https://github.com/soufoka/PokeGrid-source.git
+git clone https://github.com/cesargarma/PokeGrid-source.git
 ```
 
-**3. Open the app**
-On Windows, double click **Abrir PokeGrid** (`.bat`) in the folder. The first time it installs what it needs in a black window and opens the app; after that the window just flashes and the app opens right away. Want a shortcut? Right click it, **Send to: Desktop (create shortcut)**.
-
-You can also use **iniciar.bat**, but it keeps a black window open and closing that window closes the app.
-
-On macOS or Linux, open a terminal in the folder and run:
+**3. Open the app**  
+- **On Windows:** Double click **Abrir PokeGrid** (`.bat`) in the folder. The first time it installs dependencies in a console window and opens the app; subsequent launches start immediately. To create a desktop shortcut: Right click -> **Send to: Desktop (create shortcut)**.
+- You can also use **iniciar.bat**, which keeps the terminal window open while running.
+- **On macOS or Linux:** Open a terminal in the project folder and run:
 
 ```bash
 bash iniciar.sh
 ```
 
-That is it. Log in or create an account in each panel and, under "Treinadores" (Accounts), save the login. Next time it signs in on its own.
+Log in to each quadrant and save credentials under "Treinadores" (Accounts) to enable auto-login for future launches.
 
 ## Documentation
 
-| | |
+| Link | Description |
 |---|---|
-| **[Manual](MANUAL.md)** | What every button and panel section does (Portuguese) |
-| **[FAQ](FAQ.md)** | Common questions: updating without losing anything, the missing pokéball, scripts, spreadsheets |
-| **[Tutorial](TUTORIAL.md)** | Step by step for the no-installer version |
-| **[Changelog](CHANGELOG.md)** | What landed in each version |
+| **[Manual](MANUAL.md)** | Detailed guide for every button, panel, and card |
+| **[FAQ](FAQ.md)** | Frequently asked questions: non-destructive updates, scripts, troubleshooting |
+| **[Tutorial](TUTORIAL.md)** | Step-by-step walkthrough for non-technical users |
+| **[Changelog](CHANGELOG.md)** | Version history and release notes |
 
-## What it does
+## Key Features
 
-- Run 1 to 4 accounts, you choose how many panels to open.
-- Auto login, even when the session expires in the middle of a farm.
-- Eco mode that keeps CPU use down without hurting progress.
-- Hides the chat and the game icon menu to free up screen.
-- Alerts on shiny, dropped account, stopped farming and low supplies, on Windows and on Discord.
-- Turn each panel on or off, zoom, full screen and keyboard shortcuts.
-- Tray, start with Windows, and Portuguese, English or Spanish.
+- **Flexible Multi-Account**: Run 1 to 4 accounts independently based on your needs.
+- **Persistent Auto-Login**: Automatic background re-authentication on session drops or game disconnects.
+- **Smart Eco Mode**: Drastically reduces CPU and GPU usage by throttling rendering during background farming.
+- **Clean Game Interface**: Hides web chat and native game menus to maximize visible farming space.
+- **Audio & Discord Webhook Alerts**: Immediate alerts for shiny encounters, account disconnects, or low supplies on Windows and Discord.
+- **Granular Controls**: Individual zoom, full-screen toggles, selective mute, and hotkeys.
+- **OS Integration**: System tray support, auto-start with Windows, and multi-language support (Spanish, English, and Portuguese).
 
-## Security
+## Security & Privacy
 
-- Passwords are encrypted by Electron's `safeStorage`, which uses the OS API (DPAPI on Windows). They never leave the PC.
-- Panels are locked to the game's domain. An external link opens in your real browser, and the password is only typed into the official login page.
-- The game's camera, microphone, location and notifications are blocked.
-- You always solve the captcha. The app fills the fields and presses Enter when you tick the box, but it never touches the "Confirm you are human" widget. Beating bot detection is not the point.
+- **Local Encryption**: Credentials are encrypted using the operating system's native API via Electron's `safeStorage` (DPAPI on Windows). They never leave your PC.
+- **Sandboxed Panels**: Panels are locked to the game domain. External links open in your default browser, and credentials only interact with official login inputs.
+- **Restricted Webview Permissions**: Camera, microphone, geolocation, and browser notifications are blocked.
+- **100% Manual Captchas**: PokeGrid autofills saved credentials but never attempts to solve or bypass bot detection challenges ("Confirm you are human").
 
-## Under the hood
+## Under the Hood
 
-Each panel is an Electron `<webview>` with its own partition (`persist:conta1` to `conta4`), and that is what keeps the accounts isolated and logged in between launches. Whatever the game does not offer, the app injects into each panel: Eco swaps `requestAnimationFrame` for a slower version, the login fills through the input's native setter, and the menu and chat disappear via CSS with a `MutationObserver`. It is all in `main.js`, `preload.js` and `index.html`, nothing hidden.
+Each quadrant runs in an independent Electron `<webview>` with its own isolated partition (`persist:conta1` to `persist:conta4`), ensuring complete session isolation.
+
+The live UI extension layer (`src/custom-ui.js`) dynamically mounts enhanced analytical modals, tables, and views without altering Electron's core, enabling seamless hot-reloads during active gameplay.
+
+## Credits & Acknowledgements
+
+- **Original Project**: This software is an enhanced fork of **[PokeGrid](https://github.com/soufoka/PokeGrid-source)**, created by **[soufoka](https://github.com/soufoka)**. Huge thanks to soufoka for the initial design and architecture.
+- **Fork & Extensions**: Developed and maintained by **[cesargarma](https://github.com/cesargarma/PokeGrid-source)** with custom combat simulations, team optimizer, global inventory, and multi-account analytics.
 
 ## License
 
-MIT. Independent project, not affiliated with Poke Idle World.
+Distributed under the MIT License. Independent project not affiliated with Pokémon or Poke Idle World.
