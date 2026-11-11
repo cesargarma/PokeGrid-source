@@ -2,6 +2,30 @@
 (function() {
   window.CUSTOM_COLUMNS = true;
   window.enhanceTableCard = () => {};
+  const updateLogoAndVersion = function() {
+    try {
+      const logo = document.querySelector('#topbar .logo');
+      if (logo) {
+        for (let i = 0; i < logo.childNodes.length; i++) {
+          const n = logo.childNodes[i];
+          if (n && n.nodeType === 3 && /POKEGRID/i.test(n.textContent)) {
+            n.textContent = '\n      POKEGRID Customized\n      ';
+            break;
+          }
+        }
+      }
+      const elVer = document.getElementById('appVer');
+      if (elVer) {
+        elVer.textContent = 'v1.0';
+      }
+      const elVerNew = document.getElementById('appVerNew');
+      if (elVerNew) {
+        elVerNew.remove();
+      }
+    } catch (e) {}
+  };
+  updateLogoAndVersion();
+
   try {
     if (typeof cardsOn !== 'undefined' && cardsOn && typeof refreshCards === 'function') {
       if (typeof cdHtmlAnt !== 'undefined') cdHtmlAnt = '';
@@ -3915,6 +3939,7 @@
               refreshCards(true);
             }
             if (typeof refreshStats === 'function') refreshStats();
+            if (typeof updateLogoAndVersion === 'function') updateLogoAndVersion();
             if (typeof window.mountPokesButton === 'function') window.mountPokesButton();
             if (typeof window.mountBossesButton === 'function') window.mountBossesButton();
             if (typeof window.enhanceInvCard === 'function') window.enhanceInvCard();
@@ -3987,6 +4012,7 @@
 
   // Ejecución inicial y observación de cambios en el contenedor de cards y topbar
   setTimeout(() => {
+    if (typeof updateLogoAndVersion === 'function') updateLogoAndVersion();
     window.mountPokesButton();
     window.mountBossesButton();
     window.enhanceInvCard();
@@ -4003,6 +4029,7 @@
     const topbar = document.getElementById('topbar');
     if (topbar && !window.__topbarPokesObserver) {
       window.__topbarPokesObserver = new MutationObserver(() => {
+        if (typeof updateLogoAndVersion === 'function') updateLogoAndVersion();
         window.mountPokesButton();
         window.mountBossesButton();
         setupReloadUi();
